@@ -1,0 +1,131 @@
+using GameCore;
+using UnityEngine;
+
+[DisallowMultipleComponent]
+public class InteractableBase : MonoBehaviour
+{
+    public InteractableItemData itemData;
+    public bool destroyOnPickup = false;
+
+    [Header("Runtime State")]
+    public bool isBeingHeld = false;
+
+    [Header("UI")]
+
+    public InteractablePopupUI popupUIPrefabToSpawn;
+
+    public InteractablePopupUI popupUI;
+
+    [Tooltip("World-space offset for popup above the object")]
+    public Vector3 popupOffset = new Vector3(0f, 0.6f, 0f);
+
+    private bool promptVisible = false;
+    [Header("Prompt override (runtime)")]
+    public string lockedPromptMessage = "";
+    public int lockedPromptCost = 0;
+    private float promptLockUntil = 0f;
+
+    /*private void Start()
+    {
+        Collider col = GetComponent<Collider>();
+
+        if(col == null)
+        {
+            col = gameObject.AddComponent<Collider>();
+            
+            col.isTrigger = true;
+        }
+        else
+        {
+            col.isTrigger = true;
+        }
+    }*/
+
+    public void ShowTemporaryMessage(string message, int cost = 0, float duration = 1.5f)
+    {
+        if (string.IsNullOrEmpty(message)) return;
+        lockedPromptMessage = message;
+        lockedPromptCost = cost;
+        promptLockUntil = Time.time + Mathf.Max(0.1f, duration);
+        GameManager.Instance.OpenPromf(gameObject.name, lockedPromptMessage, lockedPromptCost);
+    }
+
+    private void Awake()
+    {
+        if (!popupUI)
+        {
+            popupUI = GetComponentInChildren<InteractablePopupUI>();
+        }
+    }
+
+#if UNITY_EDITOR
+    [ContextMenu("InstantiatePopupUI_Editor")]
+    private void InstantiatePopupUI_Editor()
+    {
+        if (Application.isEditor && !Application.isPlaying)
+        {
+            if (!popupUIPrefabToSpawn) return;
+
+            foreach(InteractablePopupUI childPopupUI in GetComponentsInChildren<InteractablePopupUI>())
+            {
+                if (childPopupUI)
+                {
+                    DestroyImmediate(childPopupUI.gameObject);
+                }
+            }
+
+            GameObject popupUIGO = Instantiate(popupUIPrefabToSpawn.gameObject);
+
+            MeshRenderer meshRend = GetComponentInChildren<MeshRenderer>();
+
+            if (meshRend)
+            {
+                popupUIGO.transform.SetParent(meshRend.transform);
+            }
+            else
+            {
+                popupUIGO.transform.SetParent(transform);
+            }
+
+            popupUIGO.transform.localPosition = new Vector3(0.0f, 
+                                                            popupUIPrefabToSpawn.transform.localPosition.y, 
+                                                            popupUIPrefabToSpawn.transform.localPosition.z);
+
+            popupUIGO.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        }
+    }
+#endif
+
+    public void ShowPrompt()
+    {
+        if (isBeingHeld || itemData == null) return;
+
+        if (!string.IsNullOrEmpty(lockedPromptMessage) && Time.time < promptLockUntil)
+        {
+            GameManager.Instance.OpenPromf(itemData.itemName, lockedPromptMessage, lockedPromptCost);
+            return;
+        }
+        if (Time.time >= promptLockUntil)
+        {
+            lockedPromptMessage = "";
+            lockedPromptCost = 0;
+            promptLockUntil = 0f;
+        }
+        string name = itemData.itemName;
+        string prompt = itemData.isCarryable ? "E" : string.Empty;
+        int cost = itemData.startingQuantity;
+
+        promptVisible = true;
+        if (GameManager.Instance) GameManager.Instance.OpenPromf(name, prompt, cost);
+    }
+
+    public void HidePrompt()
+    {
+        if (!string.IsNullOrEmpty(lockedPromptMessage) && Time.time < promptLockUntil)
+            return;
+
+        if (!promptVisible) return;
+        promptVisible = false;
+        if(GameManager.Instance) GameManager.Instance.ClosePromf();
+    }
+}
