@@ -62,10 +62,9 @@ public class InteractablePopupUI : MonoBehaviour
         followOffset = offset;
     }*/
 
-    public void Show(string name, string message, int cost)
+    public void Show(string promptText, int cost)
     {
-        nameText.text = name;
-        promptText.text = message;
+        this.promptText.text = promptText;
         if (costText) costText.text = $"₫ {cost}";
         popup.SetActive(true);
 

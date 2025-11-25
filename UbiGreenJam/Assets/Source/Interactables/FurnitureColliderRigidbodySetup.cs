@@ -3,7 +3,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class FurnitureRigidbodyCheck : MonoBehaviour
+public class FurnitureColliderRigidbodySetup : MonoBehaviour
 {
     [SerializeField]
     [Min(20.0f)]
@@ -49,6 +49,9 @@ public class FurnitureRigidbodyCheck : MonoBehaviour
         Collider meshRendCollider = meshRend.GetComponent<Collider>();
 
         if (meshRendCollider && childColliderCount > 1) Destroy(meshRendCollider);
+
+        //add also a trigger collider for pickup raycast
+        meshRend.AddComponent<BoxCollider>().isTrigger = true;
 
         Rigidbody meshRendRb = meshRend.GetComponent<Rigidbody>();
 

@@ -25,22 +25,6 @@ public class InteractableBase : MonoBehaviour
     public int lockedPromptCost = 0;
     private float promptLockUntil = 0f;
 
-    /*private void Start()
-    {
-        Collider col = GetComponent<Collider>();
-
-        if(col == null)
-        {
-            col = gameObject.AddComponent<Collider>();
-            
-            col.isTrigger = true;
-        }
-        else
-        {
-            col.isTrigger = true;
-        }
-    }*/
-
     public void ShowTemporaryMessage(string message, int cost = 0, float duration = 1.5f)
     {
         if (string.IsNullOrEmpty(message)) return;
@@ -102,9 +86,13 @@ public class InteractableBase : MonoBehaviour
 
         if (!string.IsNullOrEmpty(lockedPromptMessage) && Time.time < promptLockUntil)
         {
-            GameManager.Instance.OpenPromf(itemData.itemName, lockedPromptMessage, lockedPromptCost);
+            //GameManager.Instance.OpenPromf(itemData.itemName, lockedPromptMessage, lockedPromptCost);
+
+            if (popupUI) popupUI.Show(lockedPromptMessage, lockedPromptCost);
+
             return;
         }
+
         if (Time.time >= promptLockUntil)
         {
             lockedPromptMessage = "";
@@ -112,11 +100,16 @@ public class InteractableBase : MonoBehaviour
             promptLockUntil = 0f;
         }
         string name = itemData.itemName;
-        string prompt = itemData.isCarryable ? "E" : string.Empty;
+
+        string prompt = itemData.isCarryable ? "Pick Up" : string.Empty;
+
         int cost = itemData.startingQuantity;
 
         promptVisible = true;
-        if (GameManager.Instance) GameManager.Instance.OpenPromf(name, prompt, cost);
+
+        //GameManager.Instance.OpenPromf(name, prompt, cost);
+
+        if (popupUI) popupUI.Show(prompt, cost);
     }
 
     public void HidePrompt()
@@ -126,6 +119,8 @@ public class InteractableBase : MonoBehaviour
 
         if (!promptVisible) return;
         promptVisible = false;
-        if(GameManager.Instance) GameManager.Instance.ClosePromf();
+        //if(GameManager.Instance) GameManager.Instance.ClosePromf();
+
+        if(popupUI) popupUI.Hide();
     }
 }
