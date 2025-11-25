@@ -1,4 +1,5 @@
 using System;
+using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -109,7 +110,10 @@ namespace GameCore
         {
             ChangeState(new PreparePhaseState(this));
         }
-
+        public void ForceCloseLobby()
+        {
+            _uiManager.Lobby.SetActive(false);
+        }
         public void StartStormPhase()
         {
             if (CurrentStorm == null && stormDataAsset != null)

@@ -82,6 +82,11 @@ public class CharacterMovement : CharacterComponentBase
 
     private void Update()
     {
+        if (Photon.Pun.PhotonNetwork.InRoom)
+        {
+            if (!TryGetComponent<Photon.Pun.PhotonView>(out var pv) || !pv.IsMine)
+                return;
+        }
         FloodCheck();
         GroundCheck();          // 1) know if we're grounded this frame
         HandleCrouchInput();    // 2) update isCrouching

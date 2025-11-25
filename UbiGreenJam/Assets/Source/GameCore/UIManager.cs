@@ -11,9 +11,12 @@ public class UIManager : MonoBehaviour
     public GameObject InfoPopup; 
     public GameObject MainMenu;
     public GameObject Tutorial;
+    public GameObject Lobby;
     public CanvasGroup m_MainMenu;
     public CanvasGroup m_Tutorial;
     public CanvasGroup m_InfoPopup;
+    public CanvasGroup m_Lobby;
+    public LobbyUIManager lobbyUIManager;
 
     public float fadeDuration = 0.3f;
 
@@ -38,6 +41,19 @@ public class UIManager : MonoBehaviour
         StopAllCoroutines();
         StartCoroutine(FadeOut(m_MainMenu));
         StartCoroutine(FadeIn(m_Tutorial));
+    }
+    public void OnLobbyBtnClicks()
+    {
+        StopAllCoroutines();
+        StartCoroutine(FadeOut(m_MainMenu));
+        StartCoroutine(FadeIn(m_Lobby));
+        lobbyUIManager.OpenLobby();
+    }
+    public void OnBackLobbyBtn()
+    {
+        StopAllCoroutines();
+        StartCoroutine(FadeOut(m_Lobby));
+        StartCoroutine(FadeIn(m_MainMenu));
     }
     public void OnBackBtn()
     {

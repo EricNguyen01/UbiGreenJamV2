@@ -51,6 +51,11 @@ namespace GameCore
 
         void Update()
         {
+            if (Photon.Pun.PhotonNetwork.InRoom)
+            {
+                if (!TryGetComponent<Photon.Pun.PhotonView>(out var pv) || !pv.IsMine)
+                    return; 
+            }
             CheckForInteractablePrompt();
 
             // Pick on left mouse button press
@@ -72,6 +77,11 @@ namespace GameCore
 
         void FixedUpdate()
         {
+            if (Photon.Pun.PhotonNetwork.InRoom)
+            {
+                if (!TryGetComponent<Photon.Pun.PhotonView>(out var pv) || !pv.IsMine)
+                    return;
+            }
             // Move the kinematic anchor to the hold point position using MovePosition/MoveRotation so physics can resolve collisions
             if (holdAnchorRb != null)
             {
@@ -79,7 +89,13 @@ namespace GameCore
                 holdAnchorRb.MoveRotation(holdPoint.rotation);
             }
         }
-
+        [Photon.Pun.PunRPC]
+        void RPC_SetHeld(bool held)
+        {
+            var interactable = heldRb.GetComponent<InteractableBase>();
+            if (interactable != null)
+                interactable.isBeingHeld = held;
+        }
         void TryPickupInFront()
         {
             Ray ray;
