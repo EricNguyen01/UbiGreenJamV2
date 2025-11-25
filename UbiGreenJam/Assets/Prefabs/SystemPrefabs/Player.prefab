@@ -369,6 +369,11 @@ MonoBehaviour:
   waterAirDrag: 0.25
   submergedGravityMultiplier: 0.35
   buoyancyJump: {x: 2.5, y: 5}
+  underwaterJumpCooldown: 0.6
+  maxUpwardSpeedToAllowBoost: 1
+  maxUnderwaterUpSpeed: 6.5
+  crouchHeight: 1.2
+  crouchSpeedMultiplier: 0.6
 --- !u!114 &3683286367268374399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -391,6 +396,9 @@ MonoBehaviour:
   smoothTime: 0.03
   forceUsePlayerChildCamera: 1
   disableOtherMainCameras: 1
+  standCamY: 1
+  crouchCamY: 0.6
+  camCrouchSmooth: 10
 --- !u!114 &4604921220379230841
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -403,7 +411,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2417c034182d60489ab09fea2b2f1ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pickupRange: 2
+  pickupRange: 3
   pickupLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -439,8 +447,14 @@ MonoBehaviour:
   flood: {fileID: 0}
   cam: {fileID: 1899444767315662501}
   underwaterOverlay: {fileID: 0}
+  playerFlood: {fileID: 0}
   enterOffset: 0.1
   exitOffset: 0.2
+  partialStart: 0.65
+  partialFull: 0.9
+  partialMaxAlpha: 0.45
+  overlayFadeSpeed: 4
+  fogFadeSpeed: 2
   enableFog: 1
   underwaterFogColor: {r: 0.1, g: 0.35, b: 0.4, a: 1}
   underwaterFogDensity: 0.05

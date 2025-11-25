@@ -1,6 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 [DisallowMultipleComponent]
 public class FurnitureColliderRigidbodySetup : MonoBehaviour
@@ -15,7 +17,13 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
 
     private MeshRenderer meshRend;
 
+    private Collider meshRendTrigger;
+
     private Dictionary<Collider, CharacterController> charControllersDict = new Dictionary<Collider, CharacterController>();
+
+    private bool isProcessingDrop = false;
+
+    private bool isInOtherTrigger = false;
 
     private void Awake()
     {
@@ -52,22 +60,28 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
 
         Collider meshRendCollider = meshRend.GetComponent<Collider>();
 
-        if (meshRendCollider)
-        {
-            if (childColliderCount > 1)
-            {
-                meshRendCollider.isTrigger = true;
-            }
-        }
-        else
+        if (!meshRendCollider)
         {
             //add also a trigger collider for pickup raycast
             meshRendCollider = meshRend.AddComponent<BoxCollider>();
-
-            if(childColliderCount >= 1) meshRendCollider.isTrigger = true;
         }
 
         colliders.Add(meshRendCollider);
+
+        if (childColliderCount > 1)
+        {
+            meshRendCollider.isTrigger = true;
+
+            meshRendTrigger = meshRendCollider;
+        }
+        else
+        {
+            meshRendTrigger = meshRend.AddComponent<BoxCollider>();
+
+            meshRendTrigger.isTrigger = true;
+
+            colliders.Add(meshRendTrigger);
+        }
 
         Rigidbody meshRendRb = meshRend.GetComponent<Rigidbody>();
 
@@ -93,7 +107,7 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
         rb.sleepThreshold = 0;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    /*private void OnCollisionEnter(Collision collision)
     {
         if(!enabled) return;
 
@@ -109,6 +123,61 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
         if (collision == null) return;
 
         ProcessCharacterControllerCollision(collision);
+    }*/
+
+    private void OnTriggerEnter(Collider other)
+    {
+        isInOtherTrigger = true;
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        isInOtherTrigger = true;
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        isInOtherTrigger = false;
+    }
+
+    public void ProcessFurnitureDropped()
+    {
+        if (isProcessingDrop)
+        {
+            StopCoroutine(ProcessFurnitureDroppedCoroutine());
+        }
+
+        isProcessingDrop = false;
+
+        StartCoroutine(ProcessFurnitureDroppedCoroutine());
+    }
+
+    private IEnumerator ProcessFurnitureDroppedCoroutine()
+    {
+        if (!rb || !meshRendTrigger) yield break;
+
+        if (isProcessingDrop) yield break;
+
+        isProcessingDrop = true;
+
+        if (isInOtherTrigger)
+        {
+            rb.AddForce(Vector3.up * 2.5f, ForceMode.Impulse);
+
+            yield return new WaitForSecondsRealtime(0.1f);
+
+            DisableFurnitureColliders(false);
+        }
+        else
+        {
+            DisableFurnitureColliders(false);
+        }
+
+        isInOtherTrigger = false;
+
+        isProcessingDrop = false;
+
+        yield break;
     }
 
     private void ProcessCharacterControllerCollision(Collision collision)
@@ -147,7 +216,7 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
         {
             foreach(var collider in colliders)
             {
-                collider.enabled = false;
+                if(!collider.isTrigger) collider.enabled = false;
             }
 
             return;

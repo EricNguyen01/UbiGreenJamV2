@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace GameCore
 {
@@ -45,6 +46,7 @@ namespace GameCore
         void Update()
         {
             CheckForInteractablePrompt();
+
             // Pick on left mouse button press
             if (Input.GetKeyDown(KeyCode.E) && heldRb == null)
             {
@@ -55,6 +57,13 @@ namespace GameCore
             if (Input.GetMouseButtonUp(0) && heldRb != null)
             {
                 Drop();
+            }
+
+            if(currentInteractableLookAt && Vector3.Distance(transform.position, currentInteractableLookAt.transform.position) > pickupRange - 0.25f)
+            {
+                currentInteractableLookAt.HidePrompt();
+
+                currentInteractableLookAt = null;
             }
         }
 
@@ -71,6 +80,7 @@ namespace GameCore
         void TryPickupInFront()
         {
             Ray ray;
+
             if (aimCamera != null)
             {
                 ray = new Ray(aimCamera.transform.position, aimCamera.transform.forward);
@@ -80,7 +90,11 @@ namespace GameCore
                 ray = new Ray(transform.position + Vector3.up * 0.5f, transform.forward);
             }
 
-            if (Physics.Raycast(ray, out RaycastHit hit, pickupRange, pickupLayer, QueryTriggerInteraction.Ignore))
+            bool hasOpenedPrompt = false;
+
+            if(currentInteractableLookAt && currentInteractableLookAt.promptVisible) hasOpenedPrompt = true;
+
+            if (Physics.Raycast(ray, out RaycastHit hit, pickupRange, pickupLayer, QueryTriggerInteraction.Collide) || hasOpenedPrompt)
             {
                 Rigidbody rb = hit.rigidbody;
 
@@ -102,21 +116,35 @@ namespace GameCore
 
             Ray ray = aimCamera != null
                 ? new Ray(aimCamera.transform.position, aimCamera.transform.forward)
-                : new Ray(transform.position + Vector3.up * 0.5f, transform.forward);
+                : new Ray(transform.position + Vector3.up * 0.8f, transform.forward);
 
-            if (Physics.Raycast(ray, out RaycastHit hit, pickupRange, pickupLayer, QueryTriggerInteraction.Collide))
+            float pickRange = pickupRange - 0.25f;
+
+            if (pickRange < 0.0f) pickRange = 0.1f;
+
+            if (Physics.Raycast(ray, out RaycastHit hit, pickRange, pickupLayer, QueryTriggerInteraction.Collide))
             {
                 InteractableBase interactable = hit.collider.GetComponentInParent<InteractableBase>();
 
-                if (interactable != null && !interactable.isBeingHeld)
+                if (interactable != null)
                 {
-                    if (currentInteractableLookAt && interactable != currentInteractableLookAt) currentInteractableLookAt.HidePrompt();
+                    if (!interactable.isBeingHeld)
+                    {
+                        if (currentInteractableLookAt && interactable != currentInteractableLookAt) currentInteractableLookAt.HidePrompt();
 
-                    currentInteractableLookAt = interactable;
+                        currentInteractableLookAt = interactable;
 
-                    interactable.ShowPrompt();
+                        interactable.ShowPrompt();
+                    }
 
                     return;
+                }
+                else //If raycast is not detecting any interactable -> do not show any interact prompt
+                {
+                    if (currentInteractableLookAt)
+                    {
+                        currentInteractableLookAt.HidePrompt();
+                    }
                 }
             }
         }
@@ -143,6 +171,16 @@ namespace GameCore
             InteractableBase interactable = rb.GetComponentInParent<InteractableBase>();
             if (interactable != null)
             {
+                //TOO HEAVY -> NOT PICK UP AND RETURN
+
+                if (interactable.itemData != null && interactable.itemData.weight > 1f)
+                {
+                    interactable.ShowTemporaryMessage("Too heavy for one to carry!", 0, 1.5f);
+                    return;    
+                }
+
+                //NOT TOO HEAVY -> PICKUP-ABLE CODE BELOW
+
                 if (interactable.furnitureColliderRigidbodyData)
                 {
                     interactable.furnitureColliderRigidbodyData.DisableFurnitureColliders(true);
@@ -153,14 +191,11 @@ namespace GameCore
                     interactable.dogAI.SetHeld(true);
                 }
 
-                if (interactable.itemData != null && interactable.itemData.weight > 1f)
-                {
-                    interactable.ShowTemporaryMessage("Too heavy for one to carry!", 0, 1.5f);
-                    return;    
-                }
                 interactable.isBeingHeld = true;
+
                 interactable.HidePrompt();
-                if(GameManager.Instance) GameManager.Instance.SetHeldItem(interactable);
+
+                if (GameManager.Instance) GameManager.Instance.SetHeldItem(interactable);
             }
 
             if (currentJoint != null)
@@ -199,7 +234,7 @@ namespace GameCore
             {
                 if (interactable.furnitureColliderRigidbodyData)
                 {
-                    interactable.furnitureColliderRigidbodyData.DisableFurnitureColliders(false);
+                    interactable.furnitureColliderRigidbodyData.ProcessFurnitureDropped();
                 }
 
                 if (interactable.dogAI)

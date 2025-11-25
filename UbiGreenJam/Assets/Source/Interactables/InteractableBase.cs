@@ -19,7 +19,7 @@ public class InteractableBase : MonoBehaviour
     [Tooltip("World-space offset for popup above the object")]
     public Vector3 popupOffset = new Vector3(0f, 0.6f, 0f);
 
-    private bool promptVisible = false;
+    public bool promptVisible { get; private set; } = false;
     [Header("Prompt override (runtime)")]
     public string lockedPromptMessage = "";
     public int lockedPromptCost = 0;
@@ -44,6 +44,8 @@ public class InteractableBase : MonoBehaviour
         {
             popupUI = GetComponentInChildren<InteractablePopupUI>();
         }
+
+        if (popupUI) popupUI.transform.position += popupOffset;
 
         dogAI = GetComponent<DogAI>();
     }
@@ -125,10 +127,6 @@ public class InteractableBase : MonoBehaviour
 
     public void HidePrompt()
     {
-        if (!string.IsNullOrEmpty(lockedPromptMessage) && Time.time < promptLockUntil)
-            return;
-
-        if (!promptVisible) return;
         promptVisible = false;
         //if(GameManager.Instance) GameManager.Instance.ClosePromf();
 
