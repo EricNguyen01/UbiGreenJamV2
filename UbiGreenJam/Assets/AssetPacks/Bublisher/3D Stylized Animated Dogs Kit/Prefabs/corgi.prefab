@@ -2972,8 +2972,6 @@ GameObject:
   - component: {fileID: 8774765630090281448}
   - component: {fileID: 5633122017715040947}
   - component: {fileID: 1693673682403434771}
-  - component: {fileID: 9207509758169550292}
-  - component: {fileID: 8009036306850576856}
   - component: {fileID: 2100650448171561262}
   - component: {fileID: 3558734622126621573}
   m_Layer: 6
@@ -3109,47 +3107,6 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &9207509758169550292
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4333106941318723275}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a081bb837f087d40baf8f901cd1ceac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  roamRadius: 7
-  waitRange: {x: 1.5, y: 3.5}
-  flood: {fileID: 0}
-  waterAvoidMargin: 0.15
-  safeHeightMargin: 0.4
-  safeSpots: []
-  panicChancePerSecond: 0.015
-  maxStuckTime: 8
-  stormActive: 0
-  audioSource: {fileID: 0}
-  barkClip: {fileID: 0}
-  barkInterval: 2.5
-  state: 0
---- !u!114 &8009036306850576856
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4333106941318723275}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb6a5a03f31688d42a7af70de8362db6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  agent: {fileID: 1693673682403434771}
-  animator: {fileID: 4291414336234631490}
-  maxWorldSpeed: 2.5
-  speedDamp: 10
 --- !u!54 &2100650448171561262
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3173,9 +3130,9 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 126
+  m_Constraints: 0
   m_CollisionDetection: 1
 --- !u!114 &3558734622126621573
 MonoBehaviour:

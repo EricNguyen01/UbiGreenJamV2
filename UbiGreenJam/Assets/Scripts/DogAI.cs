@@ -38,7 +38,7 @@ public class DogAI : MonoBehaviour
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-        if (!flood) flood = FindObjectOfType<FloodController>();
+        if (!flood) flood = FindAnyObjectByType<FloodController>();
         PickNewRoamPoint();
     }
 

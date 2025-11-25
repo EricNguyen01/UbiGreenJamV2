@@ -11,6 +11,8 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
 
     private Rigidbody rb;
 
+    private List<Collider> colliders = new List<Collider>();
+
     private MeshRenderer meshRend;
 
     private Dictionary<Collider, CharacterController> charControllersDict = new Dictionary<Collider, CharacterController>();
@@ -32,26 +34,40 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
 
         int childColliderCount = 0;
 
-        foreach (Collider childColliders in GetComponentsInChildren<Collider>())
+        colliders.AddRange(GetComponentsInChildren<Collider>());
+
+        foreach (Collider childCollider in colliders)
         {
-            if (!childColliders) continue;
+            if (!childCollider) continue;
 
-            childColliders.gameObject.isStatic = false;
+            childCollider.gameObject.isStatic = false;
 
-            if (childColliders.transform.parent != meshRend.transform)
+            if (childCollider.transform.parent != meshRend.transform)
             {
-                childColliders.transform.SetParent(meshRend.transform);
+                childCollider.transform.SetParent(meshRend.transform);
             }
 
-            childColliderCount++;
+            if(!childCollider.isTrigger) childColliderCount++;
         }
 
         Collider meshRendCollider = meshRend.GetComponent<Collider>();
 
-        if (meshRendCollider && childColliderCount > 1) Destroy(meshRendCollider);
+        if (meshRendCollider)
+        {
+            if (childColliderCount > 1)
+            {
+                meshRendCollider.isTrigger = true;
+            }
+        }
+        else
+        {
+            //add also a trigger collider for pickup raycast
+            meshRendCollider = meshRend.AddComponent<BoxCollider>();
 
-        //add also a trigger collider for pickup raycast
-        meshRend.AddComponent<BoxCollider>().isTrigger = true;
+            if(childColliderCount >= 1) meshRendCollider.isTrigger = true;
+        }
+
+        colliders.Add(meshRendCollider);
 
         Rigidbody meshRendRb = meshRend.GetComponent<Rigidbody>();
 
@@ -121,5 +137,25 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
         if (!charController) return;
 
         rb.AddForce(charController.transform.forward + collision.relativeVelocity);
+    }
+
+    public void DisableFurnitureColliders(bool disabled)
+    {
+        if(colliders == null || colliders.Count == 0) return;
+
+        if (disabled)
+        {
+            foreach(var collider in colliders)
+            {
+                collider.enabled = false;
+            }
+
+            return;
+        }
+
+        foreach (var collider in colliders)
+        {
+            collider.enabled = true;
+        }
     }
 }

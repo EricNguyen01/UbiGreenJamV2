@@ -17,6 +17,10 @@ namespace GameCore
         FixedJoint currentJoint;
         CollisionDetectionMode previousCollisionMode;
 
+        private InteractableBase currentInteractableLookAt;
+
+        private bool pickUpOriginalKinematicState = false;
+
         void Start()
         {
             if (holdPoint == null)
@@ -79,14 +83,23 @@ namespace GameCore
             if (Physics.Raycast(ray, out RaycastHit hit, pickupRange, pickupLayer, QueryTriggerInteraction.Ignore))
             {
                 Rigidbody rb = hit.rigidbody;
-                if (rb != null && !rb.isKinematic)
-                {                   
+
+                if (rb != null)
+                {
+                    pickUpOriginalKinematicState = rb.isKinematic;
+
                     Pickup(rb);
+
+                    return;
                 }
+
+                pickUpOriginalKinematicState = false;
             }
         }
         void CheckForInteractablePrompt()
         {
+            if (heldRb) return;
+
             Ray ray = aimCamera != null
                 ? new Ray(aimCamera.transform.position, aimCamera.transform.forward)
                 : new Ray(transform.position + Vector3.up * 0.5f, transform.forward);
@@ -97,36 +110,57 @@ namespace GameCore
 
                 if (interactable != null && !interactable.isBeingHeld)
                 {
+                    if (currentInteractableLookAt && interactable != currentInteractableLookAt) currentInteractableLookAt.HidePrompt();
+
+                    currentInteractableLookAt = interactable;
+
                     interactable.ShowPrompt();
+
                     return;
                 }
             }
-
-            HideAllPrompts();
         }
 
-        void HideAllPrompts()
+        
+        /*void HideLastLookedAtInteractablePrompts()
         {
-            var allInteractables = FindObjectsOfType<InteractableBase>();
+            /*var allInteractables = FindObjectsOfType<InteractableBase>();
             foreach (var item in allInteractables)
             {
                 item.HidePrompt();
             }
-        }
+            if (!currentInteractableLookAt) return;
+
+            currentInteractableLookAt.HidePrompt();
+        }*/
+
         void Pickup(Rigidbody rb)
         {
             if (rb == null) return;
+
+            rb.isKinematic = false;
+
             InteractableBase interactable = rb.GetComponentInParent<InteractableBase>();
             if (interactable != null)
             {
+                if (interactable.furnitureColliderRigidbodyData)
+                {
+                    interactable.furnitureColliderRigidbodyData.DisableFurnitureColliders(true);
+                }
+
+                if (interactable.dogAI)
+                {
+                    interactable.dogAI.SetHeld(true);
+                }
+
                 if (interactable.itemData != null && interactable.itemData.weight > 1f)
                 {
-                    interactable.ShowTemporaryMessage("Too heavy for one person to carry!", 0, 1.5f);
+                    interactable.ShowTemporaryMessage("Too heavy for one to carry!", 0, 1.5f);
                     return;    
                 }
                 interactable.isBeingHeld = true;
                 interactable.HidePrompt();
-                GameManager.Instance.SetHeldItem(interactable);
+                if(GameManager.Instance) GameManager.Instance.SetHeldItem(interactable);
             }
 
             if (currentJoint != null)
@@ -155,11 +189,27 @@ namespace GameCore
         {
             if (heldRb == null) return;
 
+            heldRb.isKinematic = pickUpOriginalKinematicState;
+
+            pickUpOriginalKinematicState = false;
+
             var interactable = heldRb.GetComponent<InteractableBase>();
+
             if (interactable != null)
             {
+                if (interactable.furnitureColliderRigidbodyData)
+                {
+                    interactable.furnitureColliderRigidbodyData.DisableFurnitureColliders(false);
+                }
+
+                if (interactable.dogAI)
+                {
+                    interactable.dogAI.SetHeld(false);
+                }
+
                 interactable.isBeingHeld = false;
-                GameManager.Instance.ClearHeldItem();
+
+                if(GameManager.Instance) GameManager.Instance.ClearHeldItem();
             }
 
             if (currentJoint != null)

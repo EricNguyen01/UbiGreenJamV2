@@ -25,13 +25,17 @@ public class InteractableBase : MonoBehaviour
     public int lockedPromptCost = 0;
     private float promptLockUntil = 0f;
 
+    public DogAI dogAI { get; private set; }
+
+    public FurnitureColliderRigidbodySetup furnitureColliderRigidbodyData { get; private set; }
+
     public void ShowTemporaryMessage(string message, int cost = 0, float duration = 1.5f)
     {
         if (string.IsNullOrEmpty(message)) return;
         lockedPromptMessage = message;
         lockedPromptCost = cost;
         promptLockUntil = Time.time + Mathf.Max(0.1f, duration);
-        GameManager.Instance.OpenPromf(gameObject.name, lockedPromptMessage, lockedPromptCost);
+        if(GameManager.Instance) GameManager.Instance.OpenPromf(gameObject.name, lockedPromptMessage, lockedPromptCost);
     }
 
     private void Awake()
@@ -40,6 +44,13 @@ public class InteractableBase : MonoBehaviour
         {
             popupUI = GetComponentInChildren<InteractablePopupUI>();
         }
+
+        dogAI = GetComponent<DogAI>();
+    }
+
+    private void Start()
+    {
+        furnitureColliderRigidbodyData = GetComponent<FurnitureColliderRigidbodySetup>();
     }
 
 #if UNITY_EDITOR
