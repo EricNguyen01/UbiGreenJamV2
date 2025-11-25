@@ -23,11 +23,21 @@ public class MouseLook : CharacterComponentBase
     [SerializeField] private bool forceUsePlayerChildCamera = true;
     [SerializeField] private bool disableOtherMainCameras = true;
 
+    [Header("Crouch Camera")]
+    [Tooltip("Camera local Y when standing.")]
+    [SerializeField] private float standCamY = 1.0f;
+    [Tooltip("Camera local Y when crouched (visual only).")]
+    [SerializeField] private float crouchCamY = 0.6f;
+    [Tooltip("How fast the camera moves between stand/crouch.")]
+    [SerializeField] private float camCrouchSmooth = 10f;
+
     private Transform characterTransform;
     private float yaw;
     private float pitch;
     private float yawVelocity;
     private float pitchVelocity;
+
+    private bool isCrouching = false;
 
     protected override void Start()
     {
@@ -65,11 +75,15 @@ public class MouseLook : CharacterComponentBase
 
         // 4) Make sure it's parented to player and positioned correctly
         playerCam.transform.SetParent(transform);
-        playerCam.transform.localPosition = new Vector3(0f, 1.0f, 0f);
+        Vector3 startPos = playerCam.transform.localPosition;
+        startPos.x = 0f;
+        startPos.z = 0f;
+        startPos.y = standCamY;
+        playerCam.transform.localPosition = startPos;
         playerCam.transform.localRotation = Quaternion.identity;
 
         // 5) Ensure THIS is the active MainCamera
-        if (playerCam.CompareTag("MainCamera") == false)
+        if (!playerCam.CompareTag("MainCamera"))
             playerCam.tag = "MainCamera";
 
         // Optional: disable other main cameras that might persist from menu
@@ -109,8 +123,20 @@ public class MouseLook : CharacterComponentBase
             pitch = targetPitch;
         }
 
+        // Rotate player + camera
         characterTransform.rotation = Quaternion.Euler(0f, yaw, 0f);
         playerCam.transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+
+        // Smooth camera vertical offset for crouch
+        float targetY = isCrouching ? crouchCamY : standCamY;
+        Vector3 camLocal = playerCam.transform.localPosition;
+        camLocal.y = Mathf.Lerp(camLocal.y, targetY, camCrouchSmooth * Time.deltaTime);
+        playerCam.transform.localPosition = camLocal;
+    }
+
+    public void SetCrouchState(bool crouching)
+    {
+        isCrouching = crouching;
     }
 
     public override bool InitCharacterComponentFrom(CharacterBase character)
