@@ -122,6 +122,8 @@ namespace GameCore
                     return;
                 }
 
+                if (interactable.isPendingDestroy) return;
+
                 pickUpOriginalKinematicState = rb.isKinematic;
 
                 Pickup(rb, interactable);
@@ -146,7 +148,7 @@ namespace GameCore
                     interactableRigidbodyDict.TryAdd(hit.rigidbody, interactable);
                 }
 
-                if (interactable != null)
+                if (interactable != null && !interactable.isPendingDestroy)
                 {
                     if (!interactable.isBeingHeld && !heldRb)
                     {

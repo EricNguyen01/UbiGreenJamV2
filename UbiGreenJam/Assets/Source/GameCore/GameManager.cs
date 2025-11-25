@@ -1,5 +1,5 @@
 using System;
-using Unity.Services.Lobbies.Models;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -22,7 +22,10 @@ namespace GameCore
         public InteractableBase currentHeldItem;
 
         private GameStateBase _currentState;
+
         public StormBase CurrentStorm { get; private set; }
+
+        public List<InteractableBase> interactablesInSceneRuntime = new List<InteractableBase>();
 
         #region Events
         public event Action<GameStateBase> OnStateChanged;
@@ -130,6 +133,8 @@ namespace GameCore
             currentHeldItem = item;
             Debug.Log("Player is holding: " + item.itemData.itemName);
         }
+
+        /*
         public void OpenPromf(string name, string promf, int code)
         {
             _uiManager?.Show(name, promf, code);
@@ -137,7 +142,7 @@ namespace GameCore
         public void ClosePromf()
         {
             _uiManager?.Hide();
-        }
+        }*/
 
         public void ClearHeldItem()
         {
@@ -149,6 +154,24 @@ namespace GameCore
         {
             if (currentHeldItem == null) return false;
             return currentHeldItem.itemData.itemType == type;
+        }
+
+        public void RegisterInteractableRuntime(InteractableBase interactable)
+        {
+            if (!interactable) return;
+
+            if(interactablesInSceneRuntime.Contains(interactable)) return;
+
+            interactablesInSceneRuntime.Add(interactable);
+        }
+
+        public void DeRegisterInteractableRuntime(InteractableBase interactable)
+        {
+            if (!interactable) return;
+
+            if (!interactablesInSceneRuntime.Contains(interactable)) return;
+
+            interactablesInSceneRuntime.Remove(interactable);
         }
     }
 }

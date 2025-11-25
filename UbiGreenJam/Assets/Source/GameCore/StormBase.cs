@@ -17,10 +17,6 @@ public class StormBase
 
     [field: SerializeField]
     [field: ReadOnlyInspector]
-    private ScriptableStormData.StormDamageType stormDamageType = ScriptableStormData.StormDamageType.PerTick;
-
-    [field: SerializeField]
-    [field: ReadOnlyInspector]
     public float currentStormDamage { get; private set; } = 1.0f;// Use this to get the storm's damage at any point in its duration
 
     [SerializeField]
@@ -42,13 +38,7 @@ public class StormBase
         if (!data)
         {
             Debug.LogError($"StormBase object doesn't have a valid ref to a ScriptableStormData. It won't work correctly!");
-
-            return;
         }
-
-        stormDamageType = data.stormDamageType;
-
-        Reset();
     } 
 
     public void StartStorm()
@@ -68,7 +58,7 @@ public class StormBase
         // Here you can process triggers, spawn events, use intensity etc.
 
         //This func below only run if storm damage type is set to "PerTick"
-        ProcessDamagePerTick(delta);
+        ProcessFloodDamagePerTick(delta);
 
         if (_elapsed >= _data.duration)
         {
@@ -82,30 +72,28 @@ public class StormBase
 
         IsFinished = false;
 
-        if (stormDamageType == ScriptableStormData.StormDamageType.Fixed)
-        {
-            currentStormDamage = _data.stormFixedDamage * _data.roundDamageMultiplier;
-        }
-        else
-        {
-            currentStormDamage = _data.damagePerTick;
-        }
+        currentStormDamage = _data.damagePerTick;
 
         currentDamageTimeTicks = 0.0f;
     }
 
-    private void ProcessDamagePerTick(float delta)
+    private void ProcessFloodDamagePerTick(float delta)
     {
-        if (stormDamageType != ScriptableStormData.StormDamageType.PerTick) return;
-
         if (currentDamageTimeTicks < _data.numberOfTicksToApplyDamageMult)
         {
             currentDamageTimeTicks += delta;
         }
 
+        Debug.Log("Flood Tick");
+
         if(currentDamageTimeTicks >= _data.numberOfTicksToApplyDamageMult)
         {
             currentStormDamage *= _data.damageMultToApplyAfterTicks * _data.roundDamageMultiplier;
+
+            if (FloodController.FloodControllerInstance)
+            {
+                FloodController.FloodControllerInstance.DamageInteractablesInFloodTrigger();
+            }
 
             currentDamageTimeTicks = 0.0f;
         }

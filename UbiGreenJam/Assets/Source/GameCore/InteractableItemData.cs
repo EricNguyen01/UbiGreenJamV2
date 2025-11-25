@@ -37,6 +37,8 @@ public class InteractableItemData : ScriptableObject
     public string specialNote;
 
     [Header("Economy / Value")]
+    public float health = 100.0f;
     public int cost = 0;
+    public bool useCostAsHealth = false;
 
 }

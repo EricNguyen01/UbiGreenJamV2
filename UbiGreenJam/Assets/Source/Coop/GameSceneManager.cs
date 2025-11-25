@@ -14,7 +14,7 @@ public class GameSceneManager : MonoBehaviour
     void Start()
     {
         SpawnLocalPlayer();
-        GameManager.Instance.ForceCloseLobby();
+        if(GameManager.Instance) GameManager.Instance.ForceCloseLobby();
     }
 
     void SpawnLocalPlayer()

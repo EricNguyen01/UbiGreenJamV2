@@ -4,6 +4,10 @@ using UnityEngine.Events;
 public class FloodController : MonoBehaviour
 {
     [Header("Flood Settings")]
+
+    [SerializeField]
+    private BoxCollider floodTriggerCollider;
+
     [Tooltip("Maximum flood height above the baseY.")]
     public float maxHeight = 3f;
 
@@ -59,8 +63,49 @@ public class FloodController : MonoBehaviour
     private bool isRising = false;
     private bool isLowering = false;
 
+    public FloodDamageTriggerZone floodDamageTriggerComponent { get; private set; }
 
+    public static FloodController FloodControllerInstance;
     // --------------------------------------------------------
+
+    private void Awake()
+    {
+        if(FloodControllerInstance && FloodControllerInstance != this)
+        {
+            Destroy(gameObject);
+
+            return;
+        }
+
+        FloodControllerInstance = this;
+
+        if (!floodTriggerCollider)
+        {
+            foreach (BoxCollider col in GetComponents<BoxCollider>())
+            {
+                if (col.enabled && col.isTrigger)
+                {
+                    floodTriggerCollider = col;
+
+                    break;
+                }
+            }
+        }
+
+        if (!floodTriggerCollider)
+        {
+            floodTriggerCollider = gameObject.AddComponent<BoxCollider>();
+        }
+
+        floodTriggerCollider.isTrigger = true;
+
+        floodDamageTriggerComponent = GetComponent<FloodDamageTriggerZone>();
+
+        if(!floodDamageTriggerComponent) floodDamageTriggerComponent = gameObject.AddComponent<FloodDamageTriggerZone>();
+
+        floodDamageTriggerComponent.InitFloodDamageComponent(this, floodTriggerCollider);
+    }
+
     void Start()
     {
         if (!playerFlood)
@@ -217,5 +262,14 @@ public class FloodController : MonoBehaviour
     {
         currentIntensity = Mathf.Clamp(index, 0, intensityMultipliers.Length - 1);
         Debug.Log($"Rain intensity set to {currentIntensity} ({intensityMultipliers[currentIntensity]}x)");
+    }
+
+    //FLOOD DAMAGES INTERACTABLES IN TRIGGER ---------------------------------------------------------------------------
+
+    public void DamageInteractablesInFloodTrigger()
+    {
+        if (!floodDamageTriggerComponent) return;
+
+        floodDamageTriggerComponent.DamageInteractablesInFloodTrigger();
     }
 }

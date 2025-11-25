@@ -1,10 +1,18 @@
 using GameCore;
+using System.Collections;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 public class InteractableBase : MonoBehaviour
 {
     public InteractableItemData itemData;
+
+    private float itemMaxHealth = 100.0f;
+
+    private float itemCurrentHealth = 100.0f;
+
+    public bool isPendingDestroy { get; private set; } = false;
+
     public bool destroyOnPickup = false;
 
     [Header("Runtime State")]
@@ -20,6 +28,7 @@ public class InteractableBase : MonoBehaviour
     public Vector3 popupOffset = new Vector3(0f, 0.6f, 0f);
 
     public bool promptVisible { get; private set; } = false;
+
     [Header("Prompt override (runtime)")]
     public string lockedPromptMessage = "";
     public int lockedPromptCost = 0;
@@ -27,16 +36,7 @@ public class InteractableBase : MonoBehaviour
 
     public DogAI dogAI { get; private set; }
 
-    public FurnitureColliderRigidbodySetup furnitureColliderRigidbodyData { get; private set; }
-
-    public void ShowTemporaryMessage(string message, int cost = 0, float duration = 1.5f)
-    {
-        if (string.IsNullOrEmpty(message)) return;
-        lockedPromptMessage = message;
-        lockedPromptCost = cost;
-        promptLockUntil = Time.time + Mathf.Max(0.1f, duration);
-        //if(GameManager.Instance) GameManager.Instance.OpenPromf(gameObject.name, lockedPromptMessage, lockedPromptCost);
-    }
+    public FurnitureRequiredComponentsSetup furnitureColliderRigidbodyData { get; private set; }
 
     private void Awake()
     {
@@ -48,11 +48,38 @@ public class InteractableBase : MonoBehaviour
         if (popupUI) popupUI.transform.position += popupOffset;
 
         dogAI = GetComponent<DogAI>();
+
+        if (!itemData)
+        {
+            Debug.LogError($"Interactable: {name} is missing its item data scriptable object. Disabling interactable game object...");
+
+            enabled = false;
+
+            gameObject.SetActive(false);
+
+            return;
+        }
+
+        if (itemData.useCostAsHealth) itemMaxHealth = itemData.cost;
+
+        else itemMaxHealth = itemData.health;
+
+        itemCurrentHealth = itemMaxHealth;
+    }
+
+    private void OnEnable()
+    {
+        if(GameManager.Instance) GameManager.Instance.RegisterInteractableRuntime(this);
+    }
+
+    private void OnDisable()
+    {
+        if (GameManager.Instance) GameManager.Instance.DeRegisterInteractableRuntime(this);
     }
 
     private void Start()
     {
-        furnitureColliderRigidbodyData = GetComponent<FurnitureColliderRigidbodySetup>();
+        furnitureColliderRigidbodyData = GetComponent<FurnitureRequiredComponentsSetup>();
     }
 
 #if UNITY_EDITOR
@@ -126,11 +153,69 @@ public class InteractableBase : MonoBehaviour
         if (popupUI) popupUI.Show(prompt, cost);
     }
 
+    public void ShowTemporaryMessage(string message, int cost = 0, float duration = 1.5f)
+    {
+        if (string.IsNullOrEmpty(message)) return;
+        lockedPromptMessage = message;
+        lockedPromptCost = cost;
+        promptLockUntil = Time.time + Mathf.Max(0.1f, duration);
+        //if(GameManager.Instance) GameManager.Instance.OpenPromf(gameObject.name, lockedPromptMessage, lockedPromptCost);
+    }
+
     public void HidePrompt()
     {
         promptVisible = false;
         //if(GameManager.Instance) GameManager.Instance.ClosePromf();
 
         if(popupUI) popupUI.Hide();
+    }
+
+    public void DeductInteractableHealth(float healthToDeduct)
+    {
+        if(healthToDeduct < 0.0f) healthToDeduct = 0.0f;
+
+        itemCurrentHealth -= healthToDeduct;
+
+        if(itemCurrentHealth <= 0.0f)
+        {
+            if(!isPendingDestroy) DestroyInteractable();
+        }
+    }
+
+    private void DestroyInteractable()
+    {
+        StopAllCoroutines();
+
+        isPendingDestroy = true;
+
+        StartCoroutine(DestroyInteractableCoroutineDelay());
+    }
+
+    private IEnumerator DestroyInteractableCoroutineDelay(float delay = 0.0f)
+    {
+        if(delay < 0.0f) delay = 0.0f;
+
+        if(delay > 1.0f) delay = 1.0f;
+
+        isPendingDestroy = true;
+
+        if (popupUI) popupUI.Hide();
+
+        if (GameManager.Instance) GameManager.Instance.DeRegisterInteractableRuntime(this);
+
+        if (furnitureColliderRigidbodyData)
+        {
+            furnitureColliderRigidbodyData.DisableFurnitureColliders(true);
+
+            if(delay > 0.0f) yield return new WaitForSeconds(delay);
+
+            Destroy(furnitureColliderRigidbodyData.meshRend.gameObject);
+
+            Destroy(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject, delay);
+        }
     }
 }

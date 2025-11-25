@@ -13,7 +13,7 @@ public class WorldUIFacingCam : MonoBehaviour
 
     private Vector3 smoothVel;
 
-    private void Awake()
+    private void Start()
     {
         TryGetComponent<Canvas>(out canvas);
 
@@ -42,16 +42,6 @@ public class WorldUIFacingCam : MonoBehaviour
         }
 
         cam = canvas.worldCamera;
-    }
-
-    private void Start()
-    {
-        if (!GetComponentInParent<InteractableBase>())
-        {
-            enabled = false;
-
-            gameObject.SetActive(false);
-        }
     }
 
     private void Update()

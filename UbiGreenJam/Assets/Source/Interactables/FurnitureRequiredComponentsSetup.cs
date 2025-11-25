@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 [DisallowMultipleComponent]
-public class FurnitureColliderRigidbodySetup : MonoBehaviour
+public class FurnitureRequiredComponentsSetup : MonoBehaviour
 {
     [SerializeField]
     [Min(20.0f)]
@@ -15,11 +15,15 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
 
     private List<Collider> colliders = new List<Collider>();
 
-    private MeshRenderer meshRend;
+    public MeshRenderer meshRend { get; private set; }
 
     private Collider meshRendTrigger;
 
     private Dictionary<Collider, CharacterController> charControllersDict = new Dictionary<Collider, CharacterController>();
+
+    private InteractableBase interactableUsing;
+
+    private InteractableDamageReceiver interactableDamageReceiver;
 
     private bool isProcessingDrop = false;
 
@@ -27,16 +31,43 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
 
     private void Awake()
     {
+        interactableUsing = GetComponent<InteractableBase>();
+
+        if(!interactableUsing) interactableUsing = GetComponentInChildren<InteractableBase>();
+
+        if (!interactableUsing)
+        {
+            Debug.LogError($"FurnitureRequiredComponentsSetup component on {name} doesn't have an InteractableBase component associated with. " +
+                           "Disabling game object...");
+
+            enabled = false;
+
+            gameObject.SetActive(false);
+
+            return;
+        }
+
         meshRend = GetComponent<MeshRenderer>();
 
         if(!meshRend) meshRend = GetComponentInChildren<MeshRenderer>();
 
         if (!meshRend)
         {
+            Debug.LogError($"Couldn't find a mesh renderer on Interactable {name}. " +
+                            "It's assumed that this interactable is not properly setup and will now be disabled!");
+
             enabled = false;
+
+            gameObject.SetActive(false);
 
             return;
         }
+
+        interactableDamageReceiver = meshRend.GetComponent<InteractableDamageReceiver>();
+
+        if(!interactableDamageReceiver) interactableDamageReceiver = meshRend.AddComponent<InteractableDamageReceiver>();
+
+        interactableDamageReceiver.InitDamageReceiver(interactableUsing);
 
         meshRend.gameObject.isStatic = false;
 
@@ -165,7 +196,7 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
         if (meshRendTrigger)
         {
             meshRendTrigger.enabled = true;
-            Debug.Log("Trigger Reenabled");
+            
             yield return new WaitForFixedUpdate();
         }
 
@@ -232,8 +263,6 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
         foreach (var collider in colliders)
         {
             collider.enabled = true;
-
-            Debug.Log("Collider Enabled");
         }
     }
 }
