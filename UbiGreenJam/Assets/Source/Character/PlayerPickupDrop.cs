@@ -180,7 +180,7 @@ namespace GameCore
 
                 if (interactable.itemData != null && interactable.itemData.weight > 1f)
                 {
-                    interactable.ShowTemporaryMessage("Too heavy for one to carry!", 0, 1.5f);
+                    interactable.ShowTemporaryMessage("Too heavy for one to carry!", interactable.itemData.cost, 1.5f);
 
                     return;    
                 }

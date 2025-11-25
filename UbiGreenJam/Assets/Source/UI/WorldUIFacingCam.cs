@@ -11,6 +11,8 @@ public class WorldUIFacingCam : MonoBehaviour
 
     private Camera cam;
 
+    private Vector3 smoothVel;
+
     private void Awake()
     {
         TryGetComponent<Canvas>(out canvas);
@@ -70,11 +72,11 @@ public class WorldUIFacingCam : MonoBehaviour
 
         if(distA >= distB)
         {
-            transform.position = transform.parent.position - dir * dist;
+            transform.position = Vector3.SmoothDamp(transform.position, transform.parent.position - dir * dist, ref smoothVel, Time.deltaTime);
         }
         else
         {
-            transform.position = displayPos;
+            transform.position = Vector3.SmoothDamp(transform.position, displayPos, ref smoothVel, Time.deltaTime);
         }
     }
 

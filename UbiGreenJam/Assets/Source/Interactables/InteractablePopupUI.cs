@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 public class InteractablePopupUI : MonoBehaviour
 {
@@ -65,7 +66,17 @@ public class InteractablePopupUI : MonoBehaviour
     public void Show(string promptText, int cost)
     {
         this.promptText.text = promptText;
-        if (costText) costText.text = $"₫ {cost}";
+
+        if (!costText)
+        {
+            if (nameText)
+            {
+                costText = nameText;
+            }
+        }
+
+        if(costText) costText.text = $"₫ {cost}";
+
         popup.SetActive(true);
 
         /*

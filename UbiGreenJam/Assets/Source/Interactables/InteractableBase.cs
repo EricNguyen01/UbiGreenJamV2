@@ -35,7 +35,7 @@ public class InteractableBase : MonoBehaviour
         lockedPromptMessage = message;
         lockedPromptCost = cost;
         promptLockUntil = Time.time + Mathf.Max(0.1f, duration);
-        if(GameManager.Instance) GameManager.Instance.OpenPromf(gameObject.name, lockedPromptMessage, lockedPromptCost);
+        //if(GameManager.Instance) GameManager.Instance.OpenPromf(gameObject.name, lockedPromptMessage, lockedPromptCost);
     }
 
     private void Awake()
@@ -112,11 +112,12 @@ public class InteractableBase : MonoBehaviour
             lockedPromptCost = 0;
             promptLockUntil = 0f;
         }
+
         string name = itemData.itemName;
 
         string prompt = itemData.isCarryable ? "Pick Up" : string.Empty;
 
-        int cost = itemData.startingQuantity;
+        int cost = itemData.cost;
 
         promptVisible = true;
 
