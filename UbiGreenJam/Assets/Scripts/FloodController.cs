@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.Events;
 
 public class FloodController : MonoBehaviour
 {
@@ -6,8 +7,8 @@ public class FloodController : MonoBehaviour
     [Tooltip("Maximum flood height above the baseY.")]
     public float maxHeight = 3f;
 
-    [Tooltip("Units per second that flood rises.")]
-    public float riseSpeed = 0.5f;
+    [Tooltip("Base rising speed if intensity = 1. Final speed = this * intensityMultiplier.")]
+    public float baseRiseSpeed = 0.5f;
 
     [Tooltip("Units per second that flood lowers.")]
     public float lowerSpeed = 0.5f;
@@ -15,15 +16,42 @@ public class FloodController : MonoBehaviour
     [Tooltip("Reference to player flood detector.")]
     public PlayerFloodDetector playerFlood;
 
-    [Header("Visual Water (Optional)")]
-    [Tooltip("Prefab/plane that visually represents the water surface.")]
-    public Transform waterVisual;
 
-    [Tooltip("Offset above the calculated water plane.")]
+    // -------------------------------------------------------
+    // NEW — FLOOD INTENSITY
+    // -------------------------------------------------------
+    [Header("Flood Intensity")]
+    [Tooltip("Intensity values for RAIN LEVELS. 0 = Light, 1 = Medium, 2 = Heavy.")]
+    public float[] intensityMultipliers = new float[] { 0.5f, 1f, 1.8f };
+
+    [Tooltip("Current flood intensity index (0 = light, 1 = medium, 2 = heavy).")]
+    [Range(0, 2)]
+    public int currentIntensity = 0;
+
+    [Tooltip("Smooth transition speed when switching intensities.")]
+    public float intensityLerpSpeed = 2f;
+
+    private float currentRiseSpeed;     // final rise speed after lerp
+    private float targetRiseSpeed;      // the speed we lerp toward
+
+
+    // -------------------------------------------------------
+    [Header("Visual Water (Optional)")]
+    public Transform waterVisual;
     public float visualOffset = 0.05f;
 
     [Header("Debug")]
     public bool startRisingOnPlay = false;
+
+
+    // -------------------------------------------------------
+    // GAME OVER EVENT
+    // -------------------------------------------------------
+    [Header("Game Over Event")]
+    public UnityEvent onFloodMaxed;   // called once when water reaches max
+
+    private bool gameOverTriggered = false;
+
 
     // Internal
     private float baseY;
@@ -40,6 +68,10 @@ public class FloodController : MonoBehaviour
 
         baseY = transform.position.y;
 
+        // Set initial rise speed
+        currentRiseSpeed = baseRiseSpeed * intensityMultipliers[currentIntensity];
+        targetRiseSpeed = currentRiseSpeed;
+
         isRising = startRisingOnPlay;
 
         UpdateScaleAndPosition();
@@ -52,27 +84,39 @@ public class FloodController : MonoBehaviour
     {
         float dt = Time.deltaTime;
 
-        // Update player detector
+        // Player detector
         if (playerFlood)
             playerFlood.waterLevelY = CurrentWaterSurfaceY();
+
+
+        // --------------------------------------------
+        // Smooth intensity transition (Lerp)
+        targetRiseSpeed = baseRiseSpeed * intensityMultipliers[currentIntensity];
+        currentRiseSpeed = Mathf.Lerp(currentRiseSpeed, targetRiseSpeed, dt * intensityLerpSpeed);
+        // --------------------------------------------
+
 
         // RISE
         if (isRising)
         {
-            currentHeight += riseSpeed * dt;
+            currentHeight += currentRiseSpeed * dt;
+
             if (currentHeight >= maxHeight)
             {
                 currentHeight = maxHeight;
                 isRising = false;
+                TriggerGameOver();
             }
 
             UpdateScaleAndPosition();
             UpdateVisualWater();
         }
+
         // LOWER
         else if (isLowering)
         {
             currentHeight -= lowerSpeed * dt;
+
             if (currentHeight <= 0f)
             {
                 currentHeight = 0f;
@@ -86,17 +130,28 @@ public class FloodController : MonoBehaviour
 
 
     // --------------------------------------------------------
+    void TriggerGameOver()
+    {
+        if (gameOverTriggered) return;
+
+        gameOverTriggered = true;
+
+        Debug.Log("⚠ GAME OVER – Flood reached max height.");
+
+        if (onFloodMaxed != null)
+            onFloodMaxed.Invoke();
+    }
+
+
+    // --------------------------------------------------------
     void UpdateScaleAndPosition()
     {
-        // Height must never hit 0 (Unity breaks scaling)
         float height = Mathf.Max(currentHeight, 0.01f);
 
-        // Scale cube
         Vector3 scale = transform.localScale;
         scale.y = height;
         transform.localScale = scale;
 
-        // Position cube so bottom stays fixed at baseY
         transform.position = new Vector3(
             transform.position.x,
             baseY + height * 0.5f,
@@ -117,40 +172,26 @@ public class FloodController : MonoBehaviour
 
 
     // --------------------------------------------------------
-    // PUBLIC API (for drains, storm manager, scripts)
+    // PUBLIC API
     // --------------------------------------------------------
 
-    /// <summary>
-    /// Add flood water (start rising).
-    /// </summary>
-    public void StartFlood(float speedMultiplier = 1f)
+    public void StartFlood()
     {
         isLowering = false;
         isRising = true;
-        // Optionally apply multiplier externally
-        // riseSpeed *= speedMultiplier;
     }
 
-    /// <summary>
-    /// Stop rising but keep level as is.
-    /// </summary>
     public void StopFlood()
     {
         isRising = false;
     }
 
-    /// <summary>
-    /// Begin actively lowering water (drain or drying).
-    /// </summary>
     public void StartLowering()
     {
         isRising = false;
         isLowering = true;
     }
 
-    /// <summary>
-    /// Used by drains � removes water instantly.
-    /// </summary>
     public void RemoveWater(float amount)
     {
         currentHeight = Mathf.Max(0f, currentHeight - amount);
@@ -158,19 +199,23 @@ public class FloodController : MonoBehaviour
         UpdateVisualWater();
     }
 
-    /// <summary>
-    /// 0 to 1 normalized flood percentage.
-    /// </summary>
     public float GetNormalizedFloodLevel()
     {
         return Mathf.InverseLerp(0f, maxHeight, currentHeight);
     }
 
-    /// <summary>
-    /// Returns current water surface height in world coordinates.
-    /// </summary>
     public float CurrentWaterSurfaceY()
     {
         return baseY + currentHeight;
+    }
+
+
+    // --------------------------------------------------------
+    // NEW API — SWITCH INTENSITY
+    // --------------------------------------------------------
+    public void SetFloodIntensity(int index)
+    {
+        currentIntensity = Mathf.Clamp(index, 0, intensityMultipliers.Length - 1);
+        Debug.Log($"Rain intensity set to {currentIntensity} ({intensityMultipliers[currentIntensity]}x)");
     }
 }
