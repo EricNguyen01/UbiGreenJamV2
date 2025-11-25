@@ -42,6 +42,14 @@ public class UnderwaterEffects : MonoBehaviour
 
     void Start()
     {
+        if (Photon.Pun.PhotonNetwork.InRoom)
+        {
+            if (!TryGetComponent<Photon.Pun.PhotonView>(out var pv) || !pv.IsMine)
+            {
+                if (underwaterOverlay) underwaterOverlay.gameObject.SetActive(false);
+                return;
+            }
+        }
         if (!flood) flood = FindAnyObjectByType<FloodController>();
         if (!cam) cam = Camera.main.transform;
         if (!playerFlood) playerFlood = FindAnyObjectByType<PlayerFloodDetector>();
@@ -62,6 +70,11 @@ public class UnderwaterEffects : MonoBehaviour
 
     void Update()
     {
+        if (Photon.Pun.PhotonNetwork.InRoom)
+        {
+            if (!TryGetComponent<Photon.Pun.PhotonView>(out var pv) || !pv.IsMine)
+                return; 
+        }
         if (!flood || !cam || !playerFlood) return;
 
         float waterY = flood.CurrentWaterSurfaceY();

@@ -103,6 +103,11 @@ public class MouseLook : CharacterComponentBase
 
     private void Update()
     {
+        if (Photon.Pun.PhotonNetwork.InRoom)
+        {
+            if (!TryGetComponent<Photon.Pun.PhotonView>(out var pv) || !pv.IsMine)
+                return;
+        }
         if (!enabled || playerCam == null || characterTransform == null) return;
 
         float mx = Input.GetAxisRaw("Mouse X");
