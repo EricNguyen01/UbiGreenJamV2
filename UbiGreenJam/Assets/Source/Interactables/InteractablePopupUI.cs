@@ -75,7 +75,7 @@ public class InteractablePopupUI : MonoBehaviour
             }
         }
 
-        if(costText) costText.text = $"₫ {cost}";
+        if(costText) costText.text = $"{cost}";
 
         popup.SetActive(true);
 

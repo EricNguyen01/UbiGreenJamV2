@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace GameCore
 {
@@ -22,6 +21,8 @@ namespace GameCore
         private InteractableBase currentInteractableLookAt;
 
         private InteractableBase interactableHeld;
+
+        private bool isHoldingLMB = false;
 
         private Dictionary<Rigidbody, InteractableBase> interactableRigidbodyDict = new Dictionary<Rigidbody, InteractableBase>();
 
@@ -53,23 +54,20 @@ namespace GameCore
             CheckForInteractablePrompt();
 
             // Pick on left mouse button press
-            if (Input.GetKeyDown(KeyCode.E) && heldRb == null)
+            if (Input.GetMouseButtonDown(0) && !isHoldingLMB)
             {
-                TryPickupInFront();
+                isHoldingLMB = true;
+
+                if(!heldRb) TryPickupInFront();
             }
 
             // If the left mouse button is released, drop
-            if (Input.GetMouseButtonUp(0) && heldRb != null)
+            if (Input.GetMouseButtonUp(0) && isHoldingLMB)
             {
-                Drop();
+                isHoldingLMB = false;
+
+                if(heldRb) Drop();
             }
-
-            /*if(currentInteractableLookAt && Vector3.Distance(transform.position, currentInteractableLookAt.transform.position) > pickupRange + 0.1f)
-            {
-                currentInteractableLookAt.HidePrompt();
-
-                currentInteractableLookAt = null;
-            }*/
         }
 
         void FixedUpdate()
