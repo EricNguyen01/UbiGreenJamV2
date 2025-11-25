@@ -119,6 +119,7 @@ public class LobbyUIManager : MonoBehaviourPunCallbacks
         if (joinButton != null) joinButton.gameObject.SetActive(true);
 
         if (backToLobbyButton != null) backToLobbyButton.gameObject.SetActive(false);
+        if (backButton != null) backButton.gameObject.SetActive(true);
 
         RefreshSlotUIAll();
     }
