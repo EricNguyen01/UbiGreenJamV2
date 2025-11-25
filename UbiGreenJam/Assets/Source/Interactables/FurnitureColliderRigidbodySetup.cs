@@ -149,6 +149,8 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
 
         isProcessingDrop = false;
 
+        Debug.Log($"Furn: {name} dropped");
+
         StartCoroutine(ProcessFurnitureDroppedCoroutine());
     }
 
@@ -159,6 +161,13 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
         if (isProcessingDrop) yield break;
 
         isProcessingDrop = true;
+
+        if (meshRendTrigger)
+        {
+            meshRendTrigger.enabled = true;
+            Debug.Log("Trigger Reenabled");
+            yield return new WaitForFixedUpdate();
+        }
 
         if (isInOtherTrigger)
         {
@@ -176,8 +185,6 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
         isInOtherTrigger = false;
 
         isProcessingDrop = false;
-
-        yield break;
     }
 
     private void ProcessCharacterControllerCollision(Collision collision)
@@ -216,7 +223,7 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
         {
             foreach(var collider in colliders)
             {
-                if(!collider.isTrigger) collider.enabled = false;
+                collider.enabled = false;
             }
 
             return;
@@ -225,6 +232,8 @@ public class FurnitureColliderRigidbodySetup : MonoBehaviour
         foreach (var collider in colliders)
         {
             collider.enabled = true;
+
+            Debug.Log("Collider Enabled");
         }
     }
 }

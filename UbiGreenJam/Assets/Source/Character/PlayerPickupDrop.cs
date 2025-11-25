@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -19,6 +20,10 @@ namespace GameCore
         CollisionDetectionMode previousCollisionMode;
 
         private InteractableBase currentInteractableLookAt;
+
+        private InteractableBase interactableHeld;
+
+        private Dictionary<Rigidbody, InteractableBase> interactableRigidbodyDict = new Dictionary<Rigidbody, InteractableBase>();
 
         private bool pickUpOriginalKinematicState = false;
 
@@ -59,12 +64,12 @@ namespace GameCore
                 Drop();
             }
 
-            if(currentInteractableLookAt && Vector3.Distance(transform.position, currentInteractableLookAt.transform.position) > pickupRange - 0.25f)
+            /*if(currentInteractableLookAt && Vector3.Distance(transform.position, currentInteractableLookAt.transform.position) > pickupRange + 0.1f)
             {
                 currentInteractableLookAt.HidePrompt();
 
                 currentInteractableLookAt = null;
-            }
+            }*/
         }
 
         void FixedUpdate()
@@ -90,24 +95,22 @@ namespace GameCore
                 ray = new Ray(transform.position + Vector3.up * 0.5f, transform.forward);
             }
 
-            bool hasOpenedPrompt = false;
-
-            if(currentInteractableLookAt && currentInteractableLookAt.promptVisible) hasOpenedPrompt = true;
-
-            if (Physics.Raycast(ray, out RaycastHit hit, pickupRange, pickupLayer, QueryTriggerInteraction.Collide) || hasOpenedPrompt)
+            if (Physics.Raycast(ray, out RaycastHit hit, pickupRange, pickupLayer, QueryTriggerInteraction.Collide))
             {
                 Rigidbody rb = hit.rigidbody;
 
-                if (rb != null)
+                if (!rb) return;
+
+                InteractableBase interactable = null;
+
+                if (!interactableRigidbodyDict.TryGetValue(rb, out interactable))
                 {
-                    pickUpOriginalKinematicState = rb.isKinematic;
-
-                    Pickup(rb);
-
                     return;
                 }
 
-                pickUpOriginalKinematicState = false;
+                pickUpOriginalKinematicState = rb.isKinematic;
+
+                Pickup(rb, interactable);
             }
         }
         void CheckForInteractablePrompt()
@@ -118,17 +121,20 @@ namespace GameCore
                 ? new Ray(aimCamera.transform.position, aimCamera.transform.forward)
                 : new Ray(transform.position + Vector3.up * 0.8f, transform.forward);
 
-            float pickRange = pickupRange - 0.25f;
-
-            if (pickRange < 0.0f) pickRange = 0.1f;
-
-            if (Physics.Raycast(ray, out RaycastHit hit, pickRange, pickupLayer, QueryTriggerInteraction.Collide))
+            if (Physics.Raycast(ray, out RaycastHit hit, pickupRange, pickupLayer, QueryTriggerInteraction.Collide))
             {
-                InteractableBase interactable = hit.collider.GetComponentInParent<InteractableBase>();
+                InteractableBase interactable = null;
+
+                if(!interactableRigidbodyDict.TryGetValue(hit.rigidbody, out interactable))
+                {
+                    interactable = hit.collider.GetComponentInParent<InteractableBase>();
+
+                    interactableRigidbodyDict.TryAdd(hit.rigidbody, interactable);
+                }
 
                 if (interactable != null)
                 {
-                    if (!interactable.isBeingHeld)
+                    if (!interactable.isBeingHeld && !heldRb)
                     {
                         if (currentInteractableLookAt && interactable != currentInteractableLookAt) currentInteractableLookAt.HidePrompt();
 
@@ -139,13 +145,13 @@ namespace GameCore
 
                     return;
                 }
-                else //If raycast is not detecting any interactable -> do not show any interact prompt
-                {
-                    if (currentInteractableLookAt)
-                    {
-                        currentInteractableLookAt.HidePrompt();
-                    }
-                }
+            }
+
+            if (currentInteractableLookAt)
+            {
+                currentInteractableLookAt.HidePrompt();
+
+                currentInteractableLookAt = null;
             }
         }
 
@@ -162,13 +168,12 @@ namespace GameCore
             currentInteractableLookAt.HidePrompt();
         }*/
 
-        void Pickup(Rigidbody rb)
+        void Pickup(Rigidbody rb, InteractableBase interactable)
         {
-            if (rb == null) return;
+            if (!rb || !interactable) return;
 
             rb.isKinematic = false;
 
-            InteractableBase interactable = rb.GetComponentInParent<InteractableBase>();
             if (interactable != null)
             {
                 //TOO HEAVY -> NOT PICK UP AND RETURN
@@ -176,6 +181,7 @@ namespace GameCore
                 if (interactable.itemData != null && interactable.itemData.weight > 1f)
                 {
                     interactable.ShowTemporaryMessage("Too heavy for one to carry!", 0, 1.5f);
+
                     return;    
                 }
 
@@ -193,6 +199,8 @@ namespace GameCore
 
                 interactable.isBeingHeld = true;
 
+                interactableHeld = interactable;
+
                 interactable.HidePrompt();
 
                 if (GameManager.Instance) GameManager.Instance.SetHeldItem(interactable);
@@ -201,6 +209,7 @@ namespace GameCore
             if (currentJoint != null)
             {
                 Destroy(currentJoint);
+
                 currentJoint = null;
             }
 
@@ -222,27 +231,39 @@ namespace GameCore
 
         void Drop()
         {
-            if (heldRb == null) return;
+            if (!interactableHeld || !heldRb) return;
 
             heldRb.isKinematic = pickUpOriginalKinematicState;
 
             pickUpOriginalKinematicState = false;
 
-            var interactable = heldRb.GetComponent<InteractableBase>();
-
-            if (interactable != null)
+            if (!interactableHeld && heldRb)
             {
-                if (interactable.furnitureColliderRigidbodyData)
+                if (!interactableRigidbodyDict.TryGetValue(heldRb, out interactableHeld)) return;
+            }
+
+            if (interactableHeld != null)
+            {
+                if (interactableHeld.furnitureColliderRigidbodyData)
                 {
-                    interactable.furnitureColliderRigidbodyData.ProcessFurnitureDropped();
+                    interactableHeld.furnitureColliderRigidbodyData.ProcessFurnitureDropped();
                 }
 
-                if (interactable.dogAI)
+                if (interactableHeld.dogAI)
                 {
-                    interactable.dogAI.SetHeld(false);
+                    interactableHeld.dogAI.SetHeld(false);
                 }
 
-                interactable.isBeingHeld = false;
+                interactableHeld.isBeingHeld = false;
+
+                interactableHeld.HidePrompt();
+
+                if (currentInteractableLookAt)
+                {
+                    currentInteractableLookAt.HidePrompt();
+
+                    currentInteractableLookAt = null;
+                }
 
                 if(GameManager.Instance) GameManager.Instance.ClearHeldItem();
             }
@@ -250,10 +271,11 @@ namespace GameCore
             if (currentJoint != null)
             {
                 Destroy(currentJoint);
+
                 currentJoint = null;
             }
 
-            heldRb.collisionDetectionMode = previousCollisionMode;
+            if(heldRb) heldRb.collisionDetectionMode = previousCollisionMode;
 
             heldRb = null;
         }
