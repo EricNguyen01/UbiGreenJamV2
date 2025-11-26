@@ -1,10 +1,4 @@
-
-using Photon.Pun;
-using System.Collections;
-    using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-    using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public class WorldUIFacingCam : MonoBehaviour
@@ -15,7 +9,7 @@ public class WorldUIFacingCam : MonoBehaviour
 
     private Vector3 smoothVel;
 
-    private void OnEnable()
+    private void Start()
     {
         TryGetComponent<Canvas>(out canvas);
 
@@ -35,15 +29,13 @@ public class WorldUIFacingCam : MonoBehaviour
         {
             if (TryGetComponent<Photon.Pun.PhotonView>(out var pv) && pv.IsMine)
             {
-                foreach(var observedComp in pv.ObservedComponents)
+                foreach(Component comp in pv.ObservedComponents)
                 {
-                    if(observedComp && observedComp.GetType() == typeof(PlayerCharacter))
+                    if(comp && comp.GetType() == typeof(PlayerCharacter))
                     {
-                        PlayerCharacter playerChar = observedComp as PlayerCharacter;
+                        PlayerCharacter playerChar = comp as PlayerCharacter;
 
-                        if (playerChar && playerChar.characterPickupDrop) canvas.worldCamera = playerChar.characterPickupDrop.aimCamera;
-
-                        break;
+                        if (playerChar.characterPickupDrop) canvas.worldCamera = playerChar.characterPickupDrop.aimCamera;
                     }
                 }
             }
@@ -53,7 +45,7 @@ public class WorldUIFacingCam : MonoBehaviour
         {
             foreach(Camera cam in FindObjectsByType<Camera>(FindObjectsSortMode.None))
             {
-                if(cam && cam.enabled)
+                if(cam && cam.enabled && cam.GetComponentInParent<PlayerCharacter>())
                 {
                     canvas.worldCamera = cam;
 

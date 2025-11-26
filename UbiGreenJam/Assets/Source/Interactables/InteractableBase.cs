@@ -100,7 +100,9 @@ public class InteractableBase : MonoBehaviour
 
             GameObject popupUIGO = Instantiate(popupUIPrefabToSpawn.gameObject);
 
-            MeshRenderer meshRend = GetComponentInChildren<MeshRenderer>();
+            MeshRenderer meshRend = GetComponent<MeshRenderer>();
+
+            if(!meshRend) meshRend = GetComponentInChildren<MeshRenderer>();
 
             if (meshRend)
             {
