@@ -153,7 +153,12 @@ namespace GameCore
                 {
                     if (!interactable.isBeingHeld && !heldRb)
                     {
-                        if (currentInteractableLookAt && interactable != currentInteractableLookAt) currentInteractableLookAt.HidePrompt();
+                        if (currentInteractableLookAt && interactable != currentInteractableLookAt)
+                        {
+                            currentInteractableLookAt.HidePrompt();
+
+                            currentInteractableLookAt.EnableInteractableOutline(false);
+                        }
 
                         currentInteractableLookAt = interactable;
 
@@ -166,6 +171,8 @@ namespace GameCore
                 }
             }
 
+            //If not looking at any interactable ---------------------------------------------------------------------------
+
             if (currentInteractableLookAt)
             {
                 currentInteractableLookAt.HidePrompt();
@@ -176,58 +183,51 @@ namespace GameCore
             }
         }
 
-        
-        /*void HideLastLookedAtInteractablePrompts()
-        {
-            /*var allInteractables = FindObjectsOfType<InteractableBase>();
-            foreach (var item in allInteractables)
-            {
-                item.HidePrompt();
-            }
-            if (!currentInteractableLookAt) return;
-
-            currentInteractableLookAt.HidePrompt();
-        }*/
-
         void Pickup(Rigidbody rb, InteractableBase interactable)
         {
-            if (!rb || !interactable) return;
+            if (!rb) return;
+
+            if(!interactable) return;
 
             rb.isKinematic = false;
 
-            if (interactable != null)
+            //TOO HEAVY -> NOT PICK UP AND RETURN
+
+            if (interactable.itemData != null && interactable.itemData.weight > 1f)
             {
-                //TOO HEAVY -> NOT PICK UP AND RETURN
+                interactable.ShowTemporaryMessage("Too heavy for one to carry!", interactable.itemData.cost, 1.5f);
 
-                if (interactable.itemData != null && interactable.itemData.weight > 1f)
-                {
-                    interactable.ShowTemporaryMessage("Too heavy for one to carry!", interactable.itemData.cost, 1.5f);
-
-                    return;    
-                }
-
-                //NOT TOO HEAVY -> PICKUP-ABLE CODE BELOW
-
-                if (interactable.furnitureColliderRigidbodyData)
-                {
-                    interactable.furnitureColliderRigidbodyData.DisableFurnitureColliders(true);
-                }
-
-                if (interactable.dogAI)
-                {
-                    interactable.dogAI.SetHeld(true);
-                }
-
-                interactable.isBeingHeld = true;
-
-                interactableHeld = interactable;
-
-                interactable.HidePrompt();
-
-                interactable.EnableInteractableOutline(false);
-
-                if (GameManager.Instance) GameManager.Instance.SetHeldItem(interactable);
+                return;
             }
+
+            //NOT TOO HEAVY -> PICKUP-ABLE CODE BELOW
+
+            if (interactable.furnitureColliderRigidbodyData)
+            {
+                interactable.furnitureColliderRigidbodyData.DisableFurnitureColliders(true);
+            }
+
+            if (interactable.dogAI)
+            {
+                interactable.dogAI.SetHeld(true);
+            }
+
+            interactable.isBeingHeld = true;
+
+            interactableHeld = interactable;
+
+            interactable.HidePrompt();
+
+            interactable.EnableInteractableOutline(false);
+
+            if (currentInteractableLookAt && currentInteractableLookAt != interactable)
+            {
+                currentInteractableLookAt.HidePrompt();
+
+                currentInteractableLookAt.EnableInteractableOutline(false);
+            }
+
+            if (GameManager.Instance) GameManager.Instance.SetHeldItem(interactable);
 
             if (currentJoint != null)
             {
@@ -283,7 +283,7 @@ namespace GameCore
 
                 interactableHeld.EnableInteractableOutline(false);
 
-                if (currentInteractableLookAt)
+                if (currentInteractableLookAt && currentInteractableLookAt != interactableHeld)
                 {
                     currentInteractableLookAt.HidePrompt();
 
