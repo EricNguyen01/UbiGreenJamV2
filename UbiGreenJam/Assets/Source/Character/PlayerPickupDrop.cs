@@ -134,7 +134,7 @@ namespace GameCore
                 pickUpOriginalKinematicState = rb.isKinematic;
 
                 ///FMOD PLAY PICKUP SOUND
-                AudioManager.Instance.PlayOneShot(FMODEvents.Instance.PickupSFX, transform.position);
+                if (AudioManager.Instance) AudioManager.Instance.PlayOneShot(FMODEvents.Instance.PickupSFX, transform.position);
 
                 Pickup(rb, interactable);
             }

@@ -17,7 +17,9 @@ public class AmbienceChangeTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             //Change the ambience parameter when the player enters the trigger
-            AudioManager.Instance.SetAmbienceParameter(parameterNameEnter, parameterValueEnter);
+            //Add the (AudioManager.Instance) to check if the audio manager instance is null or not
+            if(AudioManager.Instance) AudioManager.Instance.SetAmbienceParameter(parameterNameEnter, parameterValueEnter);
+
             Debug.Log($"Player entered trigger");
         }
     }
@@ -27,7 +29,7 @@ public class AmbienceChangeTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             // Optionally reset the parameter when exiting the trigger
-            AudioManager.Instance.SetAmbienceParameter(parameterNameLeave, parameterValueLeave);
+            if (AudioManager.Instance) AudioManager.Instance.SetAmbienceParameter(parameterNameLeave, parameterValueLeave);
             Debug.Log($"Player exit trigger");
         }
     }

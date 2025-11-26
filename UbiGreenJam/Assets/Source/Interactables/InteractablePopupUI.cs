@@ -12,6 +12,8 @@ public class InteractablePopupUI : MonoBehaviour
     public TextMeshProUGUI costText;   // <- add this text in your prefab
     public GameObject popup;
 
+    private bool hasPlayedSound = false;
+
     /*
     [Header("Follow Settings")]
     public float followSmooth = 15f;
@@ -72,12 +74,18 @@ public class InteractablePopupUI : MonoBehaviour
             if (nameText)
             {
                 costText = nameText;
-                ///FMOD PLAY PICKUP SOUND
-                AudioManager.Instance.PlayOneShot(FMODEvents.Instance.UIPopUpSound, transform.position);
             }
         }
 
         if(costText) costText.text = $"{cost}";
+
+        ///FMOD PLAY PICKUP SOUND
+        if (AudioManager.Instance && !hasPlayedSound)
+        {
+            hasPlayedSound = true;
+
+            AudioManager.Instance.PlayOneShot(FMODEvents.Instance.UIPopUpSound, transform.position);
+        }
 
         popup.SetActive(true);
 
@@ -89,6 +97,8 @@ public class InteractablePopupUI : MonoBehaviour
 
     public void Hide()
     {
+        hasPlayedSound = false;
+
         popup.SetActive(false);
         //followTarget = null;
     }
