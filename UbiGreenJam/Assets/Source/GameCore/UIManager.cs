@@ -12,10 +12,12 @@ public class UIManager : MonoBehaviour
     public GameObject MainMenu;
     public GameObject Tutorial;
     public GameObject Lobby;
+    public GameObject Credits;
     public CanvasGroup m_MainMenu;
     public CanvasGroup m_Tutorial;
     public CanvasGroup m_InfoPopup;
     public CanvasGroup m_Lobby;
+    public CanvasGroup m_credits;
     public LobbyUIManager lobbyUIManager;
 
     public float fadeDuration = 0.3f;
@@ -42,6 +44,12 @@ public class UIManager : MonoBehaviour
         StartCoroutine(FadeOut(m_MainMenu));
         StartCoroutine(FadeIn(m_Tutorial));
     }
+    public void OnCreditsBtnClicks()
+    {
+        StopAllCoroutines();
+        StartCoroutine(FadeOut(m_MainMenu));
+        StartCoroutine(FadeIn(m_credits));
+    }
     public void OnLobbyBtnClicks()
     {
         StopAllCoroutines();
@@ -58,8 +66,16 @@ public class UIManager : MonoBehaviour
     public void OnBackBtn()
     {
         StopAllCoroutines();
-        StartCoroutine(FadeOut(m_Tutorial));
-        StartCoroutine(FadeIn(m_MainMenu));
+        if(Tutorial.activeSelf && !Credits.activeSelf)
+        {
+            StartCoroutine(FadeOut(m_Tutorial));
+            StartCoroutine(FadeIn(m_MainMenu));
+        }
+        else if(!Tutorial.activeSelf && Credits.activeSelf)
+        {
+            StartCoroutine(FadeOut(m_credits));
+            StartCoroutine(FadeIn(m_MainMenu));
+        }
     }
     public void Show(string name, string message, int cost)
     {
