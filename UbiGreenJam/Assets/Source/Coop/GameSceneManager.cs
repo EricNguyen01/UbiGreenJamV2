@@ -33,7 +33,6 @@ public class GameSceneManager : MonoBehaviour
 
         if(GameManager.Instance) GameManager.Instance.ForceCloseLobby();
     }
-
     private PlayerCharacter SpawnLocalPlayer()
     {
         if (spawnPoints == null || spawnPoints.Length == 0)

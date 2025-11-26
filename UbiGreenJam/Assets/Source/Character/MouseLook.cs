@@ -52,6 +52,19 @@ public class MouseLook : CharacterComponentBase
         pitch = playerCam.transform.localEulerAngles.x;
         if (pitch > 180f) pitch -= 360f;
     }
+    public void SetMouseEnabled(bool enabled)
+    {
+        if (enabled)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+    }
 
     private void ResolveCamera()
     {

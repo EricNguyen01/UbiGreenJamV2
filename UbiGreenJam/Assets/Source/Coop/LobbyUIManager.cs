@@ -6,6 +6,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using TMPro;
+using GameCore;
 
 public class LobbyUIManager : MonoBehaviourPunCallbacks
 {
@@ -87,7 +88,7 @@ public class LobbyUIManager : MonoBehaviourPunCallbacks
         for (int i = 0; i < slotButtons.Length; i++)
             if (slotButtons[i] != null) slotButtons[i].interactable = enabled;
     }
-
+    
     public void OpenLobby()
     {
         if (!PhotonNetwork.IsConnected || !PhotonNetwork.IsConnectedAndReady)
@@ -236,6 +237,7 @@ public class LobbyUIManager : MonoBehaviourPunCallbacks
                 if (canStart)
                 {
                     PhotonNetwork.LoadLevel(gameSceneToLoad);
+                    GameManager.Instance.turnOffEV(false);
                     if (lobbyPanel != null) lobbyPanel.SetActive(false);
                     if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
                     return;

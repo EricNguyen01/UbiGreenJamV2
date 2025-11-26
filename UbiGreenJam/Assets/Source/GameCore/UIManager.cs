@@ -2,6 +2,9 @@ using GameCore;
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using UnityEngine.UI;
+using Photon.Pun;
+using UnityEngine.EventSystems;
 public class UIManager : MonoBehaviour
 {
     [Header("UI Promf")]
@@ -19,8 +22,16 @@ public class UIManager : MonoBehaviour
     public CanvasGroup m_Lobby;
     public CanvasGroup m_credits;
     public LobbyUIManager lobbyUIManager;
+    public EventSystem eventSystem;
+    
+    [Header("Pause Menu")]
+    public GameObject PauseMenu;
+    public CanvasGroup m_PauseMenu;
+    public Button[] pauseButtons; 
+    public TextMeshProUGUI[] pauseButtonTexts; 
 
     public float fadeDuration = 0.3f;
+    private bool isPaused = false;
 
     public void Start()
     {
@@ -29,6 +40,132 @@ public class UIManager : MonoBehaviour
 
         m_Tutorial.alpha = 0;
         Tutorial.gameObject.SetActive(false);
+
+        m_credits.alpha = 0;
+        Credits.gameObject.SetActive(false);
+
+        m_Lobby.alpha = 0;
+        Lobby.gameObject.SetActive(false);
+
+        PauseMenu.gameObject.SetActive(false);
+    }
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            TogglePauseMenu();
+        }
+    }
+    void TogglePauseMenu()
+    {
+        if (PauseMenu.activeSelf)
+        {
+            HidePauseMenu();
+        }
+        else
+        {
+            ShowPauseMenu();
+        }
+    }
+
+    void ShowPauseMenu()
+    {
+        StopAllCoroutines();
+        PauseMenu.SetActive(true);
+        pauseButtonTexts[0].gameObject.SetActive(true);
+        pauseButtonTexts[1].gameObject.SetActive(true);
+        pauseButtonTexts[2].gameObject.SetActive(true);
+        bool isMultiplayer = PhotonNetwork.IsConnected && PhotonNetwork.InRoom;
+        var mouseLook = GameSceneManager.GameSceneManagerInstance.localPlayerChar.GetComponent<MouseLook>();
+        if (mouseLook) mouseLook.SetMouseEnabled(true);
+        if (!isMultiplayer)
+        {
+            Time.timeScale = 0f;
+            isPaused = true;
+
+            pauseButtonTexts[0].text = "Resume";
+            pauseButtonTexts[1].text = "Restart";
+            pauseButtonTexts[2].text = "Back To Main Menu";
+
+            pauseButtons[0].onClick.RemoveAllListeners();
+            pauseButtons[0].onClick.AddListener(ResumeGame);
+
+            pauseButtons[1].onClick.RemoveAllListeners();
+            pauseButtons[1].onClick.AddListener(RestartGame);
+
+            pauseButtons[2].onClick.RemoveAllListeners();
+            pauseButtons[2].onClick.AddListener(BackToMainMenu);
+        }
+        else
+        {
+            Time.timeScale = 1f;
+            isPaused = false;
+
+            pauseButtonTexts[0].text = "Resume";
+            pauseButtonTexts[1].text = "Back To Main Menu";
+
+            pauseButtons[0].onClick.RemoveAllListeners();
+            pauseButtons[0].onClick.AddListener(HidePauseMenu);
+
+            pauseButtons[1].onClick.RemoveAllListeners();
+            pauseButtons[1].onClick.AddListener(BackToLobby);
+
+            pauseButtons[2].gameObject.SetActive(false);
+        }
+    }
+
+    void HidePauseMenu()
+    {
+        StopAllCoroutines();
+        PauseMenu.SetActive(false);
+
+        if (isPaused)
+        {
+            Time.timeScale = 1f;
+            isPaused = false;
+        }
+        var mouseLook = GameSceneManager.GameSceneManagerInstance.localPlayerChar.GetComponent<MouseLook>();
+        if (mouseLook) mouseLook.SetMouseEnabled(false);
+    }
+    void ResumeGame()
+    {
+        HidePauseMenu();
+    }
+
+    void RestartGame()
+    {
+        HidePauseMenu();
+        Time.timeScale = 1f;
+        GameManager.Instance.RestartGame(); 
+    }
+
+    void BackToMainMenu()
+    {
+        HidePauseMenu();
+        Time.timeScale = 1f;
+        GameManager.Instance.ReturnToMainMenu(); 
+    }
+
+    void BackToLobby()
+    {
+        HidePauseMenu();
+        Time.timeScale = 1f;
+        if (PhotonNetwork.InRoom)
+        {
+            StartCoroutine(WaitForLeftRoomThenReturnToMainMenu());
+            PhotonNetwork.LeaveRoom();
+        }
+        else
+        {
+            GameManager.Instance.ReturnToMainMenu();
+        }
+    }
+    private IEnumerator WaitForLeftRoomThenReturnToMainMenu()
+    {
+        while (PhotonNetwork.InRoom)
+            yield return null;
+
+        GameManager.Instance.ReturnToMainMenu();
     }
     public void OnStartBtnClicks()
     {

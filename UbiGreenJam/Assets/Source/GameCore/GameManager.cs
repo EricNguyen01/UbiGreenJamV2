@@ -94,12 +94,54 @@ namespace GameCore
                 .completed += (op) =>
                 {
                     _uiManager?.ShowUI(false);
+                    turnOffEV(false);
                     StartPreparePhase();
                     Debug.Log("Game Scene Loaded, UI hidden");
                 };
         }
 
+        public void RestartGame()
+        {
+            SceneManager.LoadSceneAsync(gameSceneName, LoadSceneMode.Single)
+                .completed += (op) =>
+                {
+                    _uiManager?.ShowUI(false);
 
+                    currentHeldItem = null;
+                    interactablesInSceneRuntime.Clear();
+                    StartPreparePhase();
+
+                    Debug.Log("Game restarted");
+                };
+        }
+        public void turnOffEV(bool enabled)
+        {
+            _uiManager?.eventSystem.gameObject.SetActive(enabled);
+        }
+        public void ReturnToMainMenu()
+        {
+            var mouseLook = GameSceneManager.GameSceneManagerInstance.localPlayerChar.GetComponent<MouseLook>();
+            if (mouseLook) mouseLook.SetMouseEnabled(true);
+            SceneManager.LoadSceneAsync("SceneManager", LoadSceneMode.Single)
+            .completed += (op) =>
+            {
+                if (_uiManager != null)
+                {
+                    _uiManager.ShowUI(true);
+                    _uiManager.MainMenu.SetActive(true);
+                    _uiManager.m_MainMenu.alpha = 1;
+                    _uiManager.m_MainMenu.interactable = true;
+                    _uiManager.m_MainMenu.blocksRaycasts = true;
+                    _uiManager.Tutorial.SetActive(false);
+                    _uiManager.Credits.SetActive(false);
+                    _uiManager.Lobby.SetActive(false);
+                    _uiManager.PauseMenu.SetActive(false);
+                    turnOffEV(true);
+                }
+
+                ChangeState(new GameStartMenuState(this));
+            };
+        }
         public void ChangeState(GameStateBase newState)
         {
             _currentState?.OnExit();
