@@ -84,8 +84,6 @@ public class StormBase
             currentDamageTimeTicks += delta;
         }
 
-        Debug.Log("Flood Tick");
-
         if(currentDamageTimeTicks >= _data.numberOfTicksToApplyDamageMult)
         {
             currentStormDamage *= _data.damageMultToApplyAfterTicks * _data.roundDamageMultiplier;

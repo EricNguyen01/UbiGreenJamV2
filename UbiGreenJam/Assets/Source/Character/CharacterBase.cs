@@ -8,8 +8,6 @@ public abstract class CharacterBase : MonoBehaviour
     [SerializeField]
     public CharacterSOBase characterSOData;
 
-    [field: Header("Character Runtime Data")]
-
     protected virtual void Awake()
     {
         if (!characterSOData)
