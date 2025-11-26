@@ -1,6 +1,5 @@
 ﻿using TMPro;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 public class InteractablePopupUI : MonoBehaviour
 {
@@ -61,11 +60,6 @@ public class InteractablePopupUI : MonoBehaviour
 
     public void Show(string promptText, int cost)
     {
-        if (Photon.Pun.PhotonNetwork.InRoom)
-        {
-            if (!TryGetComponent<Photon.Pun.PhotonView>(out var pv) || !pv.IsMine) return;
-        }
-
         if (!costText)
         {
             if (nameText)
@@ -86,11 +80,6 @@ public class InteractablePopupUI : MonoBehaviour
 
     public void Hide()
     {
-        if (Photon.Pun.PhotonNetwork.InRoom)
-        {
-            if (!TryGetComponent<Photon.Pun.PhotonView>(out var pv) || !pv.IsMine) return;
-        }
-
         popup.SetActive(false);
         //followTarget = null;
     }

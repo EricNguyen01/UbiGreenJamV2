@@ -8,7 +8,7 @@ public class GameSceneManager : MonoBehaviour
 
     public PlayerCharacter characterPrefabToSpawnLocal;
 
-    public string playerPrefabResourcePath = "Assets/Prefabs/SystemPrefabs/Player.prefab";
+    public string playerPrefabResourcePath = "Player";
 
     public PlayerCharacter localPlayerChar { get; private set; }
 

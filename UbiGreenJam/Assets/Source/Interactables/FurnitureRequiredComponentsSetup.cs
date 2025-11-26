@@ -300,7 +300,6 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
         outlineComp.enabled = false;
     }
 
-#if UNITY_EDITOR
     [ContextMenu("AddOutlineComponent_Editor")]
     private void GetOrAddOutlineComponent()
     {
@@ -329,5 +328,4 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
 
         outlineComp.precomputeOutline = true;
     }
-#endif
 }
