@@ -311,14 +311,21 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
 
         if (!meshRend) return;
 
-        foreach (Outline outline in meshRend.GetComponentsInChildren<Outline>())
-        {
-            if (outline) DestroyImmediate(outline);
-        }
-
         outlineComp = meshRend.GetComponent<Outline>();
 
         if (!outlineComp) outlineComp = meshRend.AddComponent<Outline>();
+
+        foreach (Outline outline in meshRend.GetComponentsInChildren<Outline>())
+        {
+            if (outline)
+            {
+                if (outline != outlineComp)
+                {
+                    if (!Application.isPlaying) DestroyImmediate(outline);
+                    else Destroy(outline);
+                }
+            }
+        }
 
         outlineComp.OutlineMode = outlineMode;
 
