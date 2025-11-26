@@ -201,6 +201,8 @@ public class InteractableBase : MonoBehaviour
 
         if (popupUI) popupUI.Hide();
 
+        EnableInteractableOutline(false);
+
         if (GameManager.Instance) GameManager.Instance.DeRegisterInteractableRuntime(this);
 
         if (furnitureColliderRigidbodyData)
@@ -217,5 +219,12 @@ public class InteractableBase : MonoBehaviour
         {
             Destroy(gameObject, delay);
         }
+    }
+
+    public void EnableInteractableOutline(bool enabled)
+    {
+        if (!furnitureColliderRigidbodyData) return;
+
+        furnitureColliderRigidbodyData.EnableOutline(enabled);
     }
 }

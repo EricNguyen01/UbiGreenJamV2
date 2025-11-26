@@ -7,9 +7,23 @@ using UnityEngine.Rendering;
 [DisallowMultipleComponent]
 public class FurnitureRequiredComponentsSetup : MonoBehaviour
 {
+    [Header("Rigidbody Settings")]
+
     [SerializeField]
     [Min(20.0f)]
     private float rigidbodyMass = 25.0f;
+
+    [Header("Furniture Outline Settings")]
+
+    [SerializeField]
+    private Outline.Mode outlineMode = Outline.Mode.OutlineAll;
+
+    [SerializeField]
+    private Color outlineColor;
+
+    [SerializeField]
+    [Range(0.0f, 10.0f)]
+    private float outlineWidth = 5.0f;
 
     private Rigidbody rb;
 
@@ -24,6 +38,8 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
     private InteractableBase interactableUsing;
 
     private InteractableDamageReceiver interactableDamageReceiver;
+
+    private Outline outlineComp;
 
     private bool isProcessingDrop = false;
 
@@ -136,6 +152,10 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
         rb.sleepThreshold = 0;
+
+        GetOrAddOutlineComponent();
+
+        EnableOutline(false);
     }
 
     /*private void OnCollisionEnter(Collision collision)
@@ -265,4 +285,49 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
             collider.enabled = true;
         }
     }
+
+    public void EnableOutline(bool enabled)
+    {
+        if(!outlineComp) return;
+
+        if(enabled)
+        {
+            outlineComp.enabled = true;
+
+            return;
+        }
+
+        outlineComp.enabled = false;
+    }
+
+#if UNITY_EDITOR
+    [ContextMenu("AddOutlineComponent_Editor")]
+    private void GetOrAddOutlineComponent()
+    {
+        MeshRenderer meshRend = this.meshRend;
+
+        if(!meshRend) meshRend = GetComponent<MeshRenderer>();
+
+        if (!meshRend) meshRend = GetComponentInChildren<MeshRenderer>();
+
+        if (!meshRend) return;
+
+        foreach (Outline outline in meshRend.GetComponentsInChildren<Outline>())
+        {
+            if (outline) DestroyImmediate(outline);
+        }
+
+        outlineComp = meshRend.GetComponent<Outline>();
+
+        if (!outlineComp) outlineComp = meshRend.AddComponent<Outline>();
+
+        outlineComp.OutlineMode = outlineMode;
+
+        outlineComp.OutlineColor = outlineColor;
+
+        outlineComp.OutlineWidth = outlineWidth;
+
+        outlineComp.precomputeOutline = true;
+    }
+#endif
 }

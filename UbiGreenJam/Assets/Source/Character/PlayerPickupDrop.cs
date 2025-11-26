@@ -56,6 +56,7 @@ namespace GameCore
                 if (!TryGetComponent<Photon.Pun.PhotonView>(out var pv) || !pv.IsMine)
                     return; 
             }
+
             CheckForInteractablePrompt();
 
             // Pick on left mouse button press
@@ -157,6 +158,8 @@ namespace GameCore
                         currentInteractableLookAt = interactable;
 
                         interactable.ShowPrompt();
+
+                        interactable.EnableInteractableOutline(true);
                     }
 
                     return;
@@ -166,6 +169,8 @@ namespace GameCore
             if (currentInteractableLookAt)
             {
                 currentInteractableLookAt.HidePrompt();
+
+                currentInteractableLookAt.EnableInteractableOutline(false);
 
                 currentInteractableLookAt = null;
             }
@@ -218,6 +223,8 @@ namespace GameCore
                 interactableHeld = interactable;
 
                 interactable.HidePrompt();
+
+                interactable.EnableInteractableOutline(false);
 
                 if (GameManager.Instance) GameManager.Instance.SetHeldItem(interactable);
             }
@@ -274,9 +281,13 @@ namespace GameCore
 
                 interactableHeld.HidePrompt();
 
+                interactableHeld.EnableInteractableOutline(false);
+
                 if (currentInteractableLookAt)
                 {
                     currentInteractableLookAt.HidePrompt();
+
+                    currentInteractableLookAt.EnableInteractableOutline(false);
 
                     currentInteractableLookAt = null;
                 }
