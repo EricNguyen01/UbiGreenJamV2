@@ -69,7 +69,7 @@ public class CharacterMovement : CharacterComponentBase
     [SerializeField] private float buoyancyStrength = 10f;   // was 8f – holds you closer to target
 
     [Tooltip("Desired camera/head offset ABOVE the water surface in meters.")]
-    [SerializeField] private float neutralDepthFromSurface = 0.25f;  // was 0.16f – push camera clearly above
+    [SerializeField] private float neutralDepthFromSurface = 0.35f;  // was 0.16f – push camera clearly above
 
     [Tooltip("Damping factor for vertical speed while swimming (reduces bobbing).")]
     [SerializeField] private float swimDamping = 5f;  // slightly more damping to avoid visible bob
