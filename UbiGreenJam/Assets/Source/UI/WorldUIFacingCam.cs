@@ -49,7 +49,10 @@ public class WorldUIFacingCam : MonoBehaviour
                 {
                     canvas.worldCamera = cam;
 
-                    break;
+                    if (cam.tag == "Main Camera" || cam == Camera.main)
+                    {
+                        break;
+                    }
                 }
             }
         }
