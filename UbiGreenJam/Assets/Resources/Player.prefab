@@ -526,6 +526,15 @@ MonoBehaviour:
   underwaterJumpCooldown: 0.6
   maxUpwardSpeedToAllowBoost: 1
   maxUnderwaterUpSpeed: 6.5
+  swimEnterSubmerge: 0.35
+  swimExitSubmerge: 0.25
+  swimSpeedMultiplier: 1.15
+  buoyancyStrength: 10
+  neutralDepthFromSurface: 0.35
+  swimDamping: 5
+  ceilingMask:
+    serializedVersion: 2
+    m_Bits: 0
   crouchHeight: 1.2
   crouchSpeedMultiplier: 0.6
 --- !u!114 &3683286367268374399
@@ -565,6 +574,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2417c034182d60489ab09fea2b2f1ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pickUpSound:
+    Guid:
+      Data1: -69475793
+      Data2: 1249121166
+      Data3: -1861784664
+      Data4: 64817847
+    Path: event:/PickUp
+  uiPopUpSound:
+    Guid:
+      Data1: -1063781847
+      Data2: 1163278028
+      Data3: -677226590
+      Data4: 2103759190
+    Path: event:/PickUpPrompt
   pickupRange: 2.35
   pickupLayer:
     serializedVersion: 2

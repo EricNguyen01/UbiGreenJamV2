@@ -5,6 +5,8 @@ namespace GameCore
 {
     public class PlayerPickupDrop : MonoBehaviour
     {
+       
+
         [Header("Pickup Settings")]
         public float pickupRange = 3f;
         public LayerMask pickupLayer = ~0;
@@ -66,7 +68,7 @@ namespace GameCore
             {
                 isHoldingLMB = true;
 
-                if(!heldRb) TryPickupInFront();
+                if (!heldRb) TryPickupInFront();
             }
 
             // If the left mouse button is released, drop
@@ -130,6 +132,8 @@ namespace GameCore
                 if (interactable.isPendingDestroy) return;
 
                 pickUpOriginalKinematicState = rb.isKinematic;
+                ///FMOD PLAY PICKUP SOUND
+                AudioManager.Instance.PlayOneShot(FMODEvents.Instance.PickupSFX, transform.position);
 
                 Pickup(rb, interactable);
             }
@@ -149,7 +153,6 @@ namespace GameCore
                 if(!interactableRigidbodyDict.TryGetValue(hit.rigidbody, out interactable))
                 {
                     interactable = hit.collider.GetComponentInParent<InteractableBase>();
-
                     interactableRigidbodyDict.TryAdd(hit.rigidbody, interactable);
                 }
 
@@ -167,7 +170,6 @@ namespace GameCore
                         currentInteractableLookAt = interactable;
 
                         interactable.ShowPrompt();
-
                         interactable.EnableInteractableOutline(true);
                     }
 

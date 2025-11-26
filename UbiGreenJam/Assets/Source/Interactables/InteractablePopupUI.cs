@@ -1,8 +1,10 @@
 ﻿using TMPro;
 using UnityEngine;
+using FMODUnity;
 
 public class InteractablePopupUI : MonoBehaviour
 {
+
     [Header("UI Refs")]
     public Canvas interactWorldUICanvas;
     public TextMeshProUGUI promptText;
@@ -65,6 +67,8 @@ public class InteractablePopupUI : MonoBehaviour
             if (nameText)
             {
                 costText = nameText;
+                ///FMOD PLAY PICKUP SOUND
+                AudioManager.Instance.PlayOneShot(FMODEvents.Instance.UIPopUpSound, transform.position);
             }
         }
 
