@@ -15,7 +15,9 @@ namespace GameCore
 
         // Anchor rigidbody used to keep a physical joint while preserving colliders
         Rigidbody holdAnchorRb;
+
         FixedJoint currentJoint;
+
         CollisionDetectionMode previousCollisionMode;
 
         private InteractableBase currentInteractableLookAt;
@@ -76,7 +78,7 @@ namespace GameCore
             }
         }
 
-        void FixedUpdate()
+        /*void FixedUpdate()
         {
             if (Photon.Pun.PhotonNetwork.InRoom)
             {
@@ -87,9 +89,11 @@ namespace GameCore
             if (holdAnchorRb != null)
             {
                 holdAnchorRb.MovePosition(holdPoint.position);
+
                 holdAnchorRb.MoveRotation(holdPoint.rotation);
             }
-        }
+        }*/
+
         [Photon.Pun.PunRPC]
         void RPC_SetHeld(bool held)
         {
@@ -189,8 +193,6 @@ namespace GameCore
 
             if(!interactable) return;
 
-            rb.isKinematic = false;
-
             //TOO HEAVY -> NOT PICK UP AND RETURN
 
             if (interactable.itemData != null && interactable.itemData.weight > 1f)
@@ -202,6 +204,14 @@ namespace GameCore
 
             //NOT TOO HEAVY -> PICKUP-ABLE CODE BELOW
 
+            heldRb = rb;
+
+            interactable.isBeingHeld = true;
+
+            interactableHeld = interactable;
+
+            heldRb.isKinematic = false;
+
             if (interactable.furnitureColliderRigidbodyData)
             {
                 interactable.furnitureColliderRigidbodyData.DisableFurnitureColliders(true);
@@ -211,10 +221,6 @@ namespace GameCore
             {
                 interactable.dogAI.SetHeld(true);
             }
-
-            interactable.isBeingHeld = true;
-
-            interactableHeld = interactable;
 
             interactable.HidePrompt();
 
@@ -236,64 +242,75 @@ namespace GameCore
                 currentJoint = null;
             }
 
-            heldRb = rb;
-
             heldRb.linearVelocity = Vector3.zero;
             heldRb.angularVelocity = Vector3.zero;
 
-            previousCollisionMode = heldRb.collisionDetectionMode;
-            heldRb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            if (holdPoint)
+            {
+                heldRb.transform.SetParent(holdPoint);
+            }
+            else
+            {
+                heldRb.transform.SetParent(null);
+            }
 
-            heldRb.transform.SetParent(null);
+            previousCollisionMode = heldRb.collisionDetectionMode;
+
+            heldRb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
             currentJoint = heldRb.gameObject.AddComponent<FixedJoint>();
             currentJoint.connectedBody = holdAnchorRb;
             currentJoint.breakForce = Mathf.Infinity;
             currentJoint.breakTorque = Mathf.Infinity;
+            currentJoint.enableCollision = false;
         }
 
         void Drop()
         {
-            if (!interactableHeld || !heldRb) return;
+            if (!heldRb) return;
 
-            heldRb.isKinematic = pickUpOriginalKinematicState;
+            if (!interactableHeld) return;
 
-            pickUpOriginalKinematicState = false;
+            InteractableBase interactable;
 
-            if (!interactableHeld && heldRb)
+            if (!interactableRigidbodyDict.TryGetValue(heldRb, out interactable)) return;
+
+            if (interactable != interactableHeld) return;
+
+            if (currentJoint) currentJoint.connectedBody = null;
+
+            if(heldRb.transform.parent) heldRb.transform.SetParent(null);
+
+            heldRb.isKinematic = false;
+
+            heldRb.AddForce(transform.forward * 50.0f + Vector3.up * 200.0f, ForceMode.Impulse);
+
+            if (interactableHeld.furnitureColliderRigidbodyData)
             {
-                if (!interactableRigidbodyDict.TryGetValue(heldRb, out interactableHeld)) return;
+                interactableHeld.furnitureColliderRigidbodyData.DisableFurnitureColliders(false, 0.1f);
             }
 
-            if (interactableHeld != null)
+            if (interactableHeld.dogAI)
             {
-                if (interactableHeld.furnitureColliderRigidbodyData)
-                {
-                    interactableHeld.furnitureColliderRigidbodyData.ProcessFurnitureDropped();
-                }
-
-                if (interactableHeld.dogAI)
-                {
-                    interactableHeld.dogAI.SetHeld(false);
-                }
-
-                interactableHeld.isBeingHeld = false;
-
-                interactableHeld.HidePrompt();
-
-                interactableHeld.EnableInteractableOutline(false);
-
-                if (currentInteractableLookAt && currentInteractableLookAt != interactableHeld)
-                {
-                    currentInteractableLookAt.HidePrompt();
-
-                    currentInteractableLookAt.EnableInteractableOutline(false);
-
-                    currentInteractableLookAt = null;
-                }
-
-                if(GameManager.Instance) GameManager.Instance.ClearHeldItem();
+                interactableHeld.dogAI.SetHeld(false);
             }
+
+            interactableHeld.isBeingHeld = false;
+
+            interactableHeld.HidePrompt();
+
+            interactableHeld.EnableInteractableOutline(false);
+
+            if (currentInteractableLookAt && currentInteractableLookAt != interactableHeld)
+            {
+                currentInteractableLookAt.HidePrompt();
+
+                currentInteractableLookAt.EnableInteractableOutline(false);
+
+                currentInteractableLookAt = null;
+            }
+
+            if (GameManager.Instance) GameManager.Instance.ClearHeldItem();
 
             if (currentJoint != null)
             {
@@ -302,7 +319,11 @@ namespace GameCore
                 currentJoint = null;
             }
 
-            if(heldRb) heldRb.collisionDetectionMode = previousCollisionMode;
+            heldRb.isKinematic = pickUpOriginalKinematicState;
+
+            pickUpOriginalKinematicState = false;
+
+            heldRb.collisionDetectionMode = previousCollisionMode;
 
             heldRb = null;
         }

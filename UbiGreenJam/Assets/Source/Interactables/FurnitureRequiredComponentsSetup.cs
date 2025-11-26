@@ -1,3 +1,4 @@
+using GameCore;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -41,7 +42,7 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
 
     private Outline outlineComp;
 
-    private bool isProcessingDrop = false;
+    private bool isProcessingCollidersDelay = false;
 
     private bool isInOtherTrigger = false;
 
@@ -158,114 +159,6 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
         EnableOutline(false);
     }
 
-    /*private void OnCollisionEnter(Collision collision)
-    {
-        if(!enabled) return;
-
-        if(collision == null) return;
-
-        ProcessCharacterControllerCollision(collision);
-    }
-
-    private void OnCollisionStay(Collision collision)
-    {
-        if (!enabled) return;
-
-        if (collision == null) return;
-
-        ProcessCharacterControllerCollision(collision);
-    }*/
-
-    private void OnTriggerEnter(Collider other)
-    {
-        isInOtherTrigger = true;
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
-        isInOtherTrigger = true;
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        isInOtherTrigger = false;
-    }
-
-    public void ProcessFurnitureDropped()
-    {
-        if (isProcessingDrop)
-        {
-            StopCoroutine(ProcessFurnitureDroppedCoroutine());
-        }
-
-        isProcessingDrop = false;
-
-        Debug.Log($"Furn: {name} dropped");
-
-        StartCoroutine(ProcessFurnitureDroppedCoroutine());
-    }
-
-    private IEnumerator ProcessFurnitureDroppedCoroutine()
-    {
-        if (!rb || !meshRendTrigger) yield break;
-
-        if (isProcessingDrop) yield break;
-
-        isProcessingDrop = true;
-
-        if (meshRendTrigger)
-        {
-            meshRendTrigger.enabled = true;
-            
-            yield return new WaitForFixedUpdate();
-        }
-
-        if (isInOtherTrigger)
-        {
-            rb.AddForce(Vector3.up * 2.5f, ForceMode.Impulse);
-
-            yield return new WaitForSecondsRealtime(0.1f);
-
-            DisableFurnitureColliders(false);
-        }
-        else
-        {
-            DisableFurnitureColliders(false);
-        }
-
-        isInOtherTrigger = false;
-
-        isProcessingDrop = false;
-    }
-
-    private void ProcessCharacterControllerCollision(Collision collision)
-    {
-        if (!enabled) return;
-
-        if (!rb) return;
-
-        if (rb.IsSleeping()) rb.WakeUp();
-
-        CharacterController charController = null;
-
-        if (charControllersDict.ContainsKey(collision.collider))
-        {
-            charController = charControllersDict[collision.collider];
-        }
-        else
-        {
-            charController = collision.collider.GetComponent<CharacterController>();
-
-            if (!charController) return;
-
-            charControllersDict.TryAdd(collision.collider, charController);
-        }
-
-        if (!charController) return;
-
-        rb.AddForce(charController.transform.forward + collision.relativeVelocity);
-    }
-
     public void DisableFurnitureColliders(bool disabled)
     {
         if(colliders == null || colliders.Count == 0) return;
@@ -284,6 +177,45 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
         {
             collider.enabled = true;
         }
+    }
+
+    public void DisableFurnitureColliders(bool disabled, float delay)
+    {
+        if(delay <= 0.0f)
+        {
+            DisableFurnitureColliders(disabled);
+
+            return;
+        }
+
+        if (isProcessingCollidersDelay)
+        {
+            StopCoroutine(DisableFurnitureCollidersDelay(disabled, delay));
+
+            isProcessingCollidersDelay = false;
+        }
+
+        StartCoroutine(DisableFurnitureCollidersDelay(disabled, delay));
+    }
+
+    private IEnumerator DisableFurnitureCollidersDelay(bool disabled, float delay)
+    {
+        if (isProcessingCollidersDelay) yield break;
+
+        if(delay <= 0.0f)
+        {
+            DisableFurnitureColliders(disabled);
+
+            yield break;
+        }
+
+        isProcessingCollidersDelay = true;
+
+        yield return new WaitForSecondsRealtime(delay);
+
+        DisableFurnitureColliders(disabled);
+
+        isProcessingCollidersDelay = false;
     }
 
     public void EnableOutline(bool enabled)

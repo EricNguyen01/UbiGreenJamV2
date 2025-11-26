@@ -131,7 +131,7 @@ namespace GameCore
         public void SetHeldItem(InteractableBase item)
         {
             currentHeldItem = item;
-            Debug.Log("Player is holding: " + item.itemData.itemName);
+            //Debug.Log("Player is holding: " + item.itemData.itemName);
         }
 
         /*
