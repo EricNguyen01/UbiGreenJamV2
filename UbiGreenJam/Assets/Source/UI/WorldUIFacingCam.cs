@@ -1,8 +1,4 @@
-
-    using System.Collections;
-    using System.Collections.Generic;
-    using UnityEngine;
-    using UnityEngine.UI;
+using UnityEngine;
 
 [DisallowMultipleComponent]
 public class WorldUIFacingCam : MonoBehaviour
@@ -29,10 +25,39 @@ public class WorldUIFacingCam : MonoBehaviour
             return;
         }
 
-        if (canvas.worldCamera == null)
+        if (Photon.Pun.PhotonNetwork.InRoom)
         {
-            canvas.worldCamera = Camera.main;
+            if (TryGetComponent<Photon.Pun.PhotonView>(out var pv) && pv.IsMine)
+            {
+                foreach(Component comp in pv.ObservedComponents)
+                {
+                    if(comp && comp.GetType() == typeof(PlayerCharacter))
+                    {
+                        PlayerCharacter playerChar = comp as PlayerCharacter;
+
+                        if (playerChar.characterPickupDrop) canvas.worldCamera = playerChar.characterPickupDrop.aimCamera;
+                    }
+                }
+            }
         }
+
+        if (!canvas.worldCamera)
+        {
+            foreach(Camera cam in FindObjectsByType<Camera>(FindObjectsSortMode.None))
+            {
+                if(cam && cam.enabled && cam.GetComponentInParent<PlayerCharacter>())
+                {
+                    canvas.worldCamera = cam;
+
+                    if (cam.tag == "Main Camera" || cam == Camera.main)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if(!canvas.worldCamera) canvas.worldCamera = Camera.main;
 
         if (!canvas.worldCamera)
         {

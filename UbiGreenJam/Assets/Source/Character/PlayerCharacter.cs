@@ -1,15 +1,22 @@
 using UnityEngine;
 using Photon.Pun;
+using GameCore;
 
 [RequireComponent(typeof(CharacterMovement), typeof(MouseLook))]
 public class PlayerCharacter : CharacterBase
 {
     [field: Header("Player Character Components")]
+
     [field: SerializeField] public MouseLook characterMouseLook { get; protected set; }
+
     [field: SerializeField] public CharacterMovement characterMovement { get; protected set; }
 
-    private Camera playerCamera;
+    [field: SerializeField] public PlayerPickupDrop characterPickupDrop { get; protected set; }
+
+    public Camera playerCamera { get; protected set; }
+
     private AudioListener audioListener;
+
     private bool isMultiplayer;
 
     protected override void Awake()
@@ -18,7 +25,18 @@ public class PlayerCharacter : CharacterBase
 
         isMultiplayer = PhotonNetwork.InRoom;
 
-        playerCamera = GetComponentInChildren<Camera>(true);
+        foreach(Camera cam in GetComponentsInChildren<Camera>())
+        {
+            if(cam && cam.enabled && !cam.tag.ToLower().Contains("ui")) playerCamera = cam;
+
+            if(cam.tag.ToLower() == "MainCamera")
+            {
+                playerCamera = cam;
+
+                break;
+            }
+        }
+
         audioListener = GetComponentInChildren<AudioListener>(true);
 
         if (!characterMovement)
@@ -30,6 +48,7 @@ public class PlayerCharacter : CharacterBase
                 characterMovement = gameObject.AddComponent<CharacterMovement>();
             }
         }
+
         characterMovement.InitCharacterComponentFrom(this);
 
         if (!characterMouseLook)
@@ -41,7 +60,10 @@ public class PlayerCharacter : CharacterBase
                 characterMouseLook = gameObject.AddComponent<MouseLook>();
             }
         }
+
         characterMouseLook.InitCharacterComponentFrom(this);
+
+        if (!characterPickupDrop) characterPickupDrop = GetComponent<PlayerPickupDrop>();
     }
 
     void Start()

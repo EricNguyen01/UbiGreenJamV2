@@ -18,7 +18,7 @@ public class InteractablePopupUI : MonoBehaviour
 
     private Transform followTarget;
     private Vector3 followOffset;*/
-    private Camera cam;
+    //private Camera cam;
 
     void Awake()
     {
@@ -30,10 +30,6 @@ public class InteractablePopupUI : MonoBehaviour
         if(!interactWorldUICanvas) interactWorldUICanvas = gameObject.AddComponent<Canvas>();
 
         if(interactWorldUICanvas.renderMode != RenderMode.WorldSpace) interactWorldUICanvas.renderMode = RenderMode.WorldSpace;
-
-        cam = Camera.main;
-
-        if (!interactWorldUICanvas.worldCamera) interactWorldUICanvas.worldCamera = cam;
 
         popup.SetActive(false);
     }
@@ -65,7 +61,10 @@ public class InteractablePopupUI : MonoBehaviour
 
     public void Show(string promptText, int cost)
     {
-        this.promptText.text = promptText;
+        if (Photon.Pun.PhotonNetwork.InRoom)
+        {
+            if (!TryGetComponent<Photon.Pun.PhotonView>(out var pv) || !pv.IsMine) return;
+        }
 
         if (!costText)
         {
@@ -87,6 +86,11 @@ public class InteractablePopupUI : MonoBehaviour
 
     public void Hide()
     {
+        if (Photon.Pun.PhotonNetwork.InRoom)
+        {
+            if (!TryGetComponent<Photon.Pun.PhotonView>(out var pv) || !pv.IsMine) return;
+        }
+
         popup.SetActive(false);
         //followTarget = null;
     }
