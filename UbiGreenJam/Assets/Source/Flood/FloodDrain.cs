@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
-public class FloodDrain : MonoBehaviour
+public class FloodDrain : InteractableBase
 {
     [Header("Refs")]
     public FloodController flood;
@@ -154,8 +154,9 @@ public class FloodDrain : MonoBehaviour
         if (unclogBurstParticles)
             unclogBurstParticles.Play();
 
-        if (popOnUnclog)
-            StartCoroutine(PopRoutine());
+        //Commented out this if because it's causing drain scaling and UI bugs!!!
+        /*if (popOnUnclog)
+            StartCoroutine(PopRoutine());*/
 
         UpdateVisuals(activeDraining: false);
     }
@@ -292,6 +293,25 @@ public class FloodDrain : MonoBehaviour
         }
 
         transform.localScale = baseScale;
+    }
+
+    public override void ShowPrompt()
+    {
+        //TODO: Update text in interval, not every frame...
+
+        string unclogStr = $"{unclogKey} - Unclog";
+
+        if (clogLevel <= 0.0f) unclogStr = "No Clog";
+
+        if (popupUI) popupUI.Show(unclogStr, 0);
+
+        promptVisible = true;
+    }
+
+    public override void HidePrompt()
+    {
+        //TODO: Reset show prompt text update interval time
+        base.HidePrompt();
     }
 
     void OnTriggerEnter(Collider other)

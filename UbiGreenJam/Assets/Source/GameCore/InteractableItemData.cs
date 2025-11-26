@@ -1,3 +1,4 @@
+using CrossClimbLite;
 using UnityEngine;
 
 public enum InteractableItemType
@@ -26,6 +27,7 @@ public class InteractableItemData : ScriptableObject
 
     [Header("Gameplay")]
     public bool isCarryable = true;
+    public bool isDamageable = true;
     public bool isConsumable = false;
     public bool destroyOnUse = false;
 
@@ -40,5 +42,11 @@ public class InteractableItemData : ScriptableObject
     public float health = 100.0f;
     public int cost = 0;
     public bool useCostAsHealth = false;
+
+    [Header("Flood Damage Mitigation")]
+
+    [HelpBox("0.0f = full mitigation, take no damage from flood | 1.0f = no mitigation, take full flood damage.")]
+    [Range(0.0f, 1.0f)]
+    public float floodDamageMitigation = 1.0f;
 
 }

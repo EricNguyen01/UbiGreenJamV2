@@ -129,6 +129,8 @@ namespace GameCore
 
                 if (interactable.isPendingDestroy) return;
 
+                if (!interactable.allowPickUp) return;
+
                 pickUpOriginalKinematicState = rb.isKinematic;
 
                 Pickup(rb, interactable);
@@ -146,24 +148,44 @@ namespace GameCore
             {
                 InteractableBase interactable = null;
 
-                if(!interactableRigidbodyDict.TryGetValue(hit.rigidbody, out interactable))
+                if (hit.rigidbody)
+                {
+                    if (!interactableRigidbodyDict.TryGetValue(hit.rigidbody, out interactable))
+                    {
+                        interactable = hit.collider.GetComponentInParent<InteractableBase>();
+
+                        interactableRigidbodyDict.TryAdd(hit.rigidbody, interactable);
+                    }
+                }
+                else
                 {
                     interactable = hit.collider.GetComponentInParent<InteractableBase>();
-
-                    interactableRigidbodyDict.TryAdd(hit.rigidbody, interactable);
                 }
 
                 if (interactable != null && !interactable.isPendingDestroy)
                 {
+                    if (currentInteractableLookAt && interactable != currentInteractableLookAt)
+                    {
+                        currentInteractableLookAt.HidePrompt();
+
+                        currentInteractableLookAt.EnableInteractableOutline(false);
+                    }
+
+                    if (interactable.GetType() == typeof(FloodDrain))
+                    {
+                        FloodDrain floodDrain = interactable as FloodDrain;
+
+                        currentInteractableLookAt = interactable;
+
+                        floodDrain.ShowPrompt();
+
+                        floodDrain.EnableInteractableOutline(true);
+
+                        return;
+                    }
+
                     if (!interactable.isBeingHeld && !heldRb)
                     {
-                        if (currentInteractableLookAt && interactable != currentInteractableLookAt)
-                        {
-                            currentInteractableLookAt.HidePrompt();
-
-                            currentInteractableLookAt.EnableInteractableOutline(false);
-                        }
-
                         currentInteractableLookAt = interactable;
 
                         interactable.ShowPrompt();

@@ -720,6 +720,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2057395283382592320, guid: a35fccc223f3304418770ea4898d9a91, type: 3}
+      propertyPath: sceneViewId
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4094971998977859813, guid: a35fccc223f3304418770ea4898d9a91, type: 3}
       propertyPath: m_Name
       value: Furniture_TrashSmall
@@ -776,6 +780,10 @@ PrefabInstance:
       propertyPath: popupUIPrefabToSpawn
       value: 
       objectReference: {fileID: 1213848086738797370, guid: cedf716248f1bd4468241bb4f7f27445, type: 3}
+    - target: {fileID: 9217604628593377071, guid: a35fccc223f3304418770ea4898d9a91, type: 3}
+      propertyPath: destroyFXPrefabToSpawn
+      value: 
+      objectReference: {fileID: 6650199810314842004, guid: 26791c2b0e6859e49a201015f4ea1907, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 108774140484908616, guid: a35fccc223f3304418770ea4898d9a91, type: 3}
@@ -829,6 +837,17 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: -1721684305888243470}
   m_SourcePrefab: {fileID: 100100000, guid: a35fccc223f3304418770ea4898d9a91, type: 3}
+--- !u!114 &615678800858743621 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5543163144141146242, guid: a35fccc223f3304418770ea4898d9a91, type: 3}
+  m_PrefabInstance: {fileID: 4928645644605623239}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8985334707998796578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1058464647693413050 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5392632727577928061, guid: a35fccc223f3304418770ea4898d9a91, type: 3}
@@ -1767,7 +1786,9 @@ MonoBehaviour:
   Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 615678800858743621}
+  - {fileID: 8401966210708497919}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0

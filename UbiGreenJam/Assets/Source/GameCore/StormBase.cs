@@ -27,7 +27,11 @@ public class StormBase
     [field: ReadOnlyInspector]
     public bool IsFinished { get; private set; } = false;
 
+    private float cumulativeDamMult = 1.0f;
+
     private float currentDamageTimeTicks = 0.0f;
+
+    private float currentDamageMultTimeTicks = 0.0f;
 
     public StormBase(ScriptableStormData data)
     {
@@ -57,6 +61,8 @@ public class StormBase
 
         // Here you can process triggers, spawn events, use intensity etc.
 
+        ProcessCumulativeDamageMultiplier(delta);
+
         //This func below only run if storm damage type is set to "PerTick"
         ProcessFloodDamagePerTick(delta);
 
@@ -74,19 +80,23 @@ public class StormBase
 
         currentStormDamage = _data.damagePerTick;
 
+        cumulativeDamMult = 1.0f;
+
         currentDamageTimeTicks = 0.0f;
+
+        currentDamageMultTimeTicks = 0.0f;
     }
 
     private void ProcessFloodDamagePerTick(float delta)
     {
-        if (currentDamageTimeTicks < _data.numberOfTicksToApplyDamageMult)
+        if (currentDamageTimeTicks < _data.numberOfTicksToDealDamage)
         {
             currentDamageTimeTicks += delta;
         }
 
-        if(currentDamageTimeTicks >= _data.numberOfTicksToApplyDamageMult)
+        if(currentDamageTimeTicks >= _data.numberOfTicksToDealDamage)
         {
-            currentStormDamage *= _data.damageMultToApplyAfterTicks * _data.roundDamageMultiplier;
+            currentStormDamage *= (_data.allowCumulativeDamageMultiplier ? cumulativeDamMult : 1.0f) * _data.roundDamageMultiplier;
 
             if (FloodController.FloodControllerInstance)
             {
@@ -94,6 +104,23 @@ public class StormBase
             }
 
             currentDamageTimeTicks = 0.0f;
+        }
+    }
+
+    private void ProcessCumulativeDamageMultiplier(float delta)
+    {
+        if (!_data.allowCumulativeDamageMultiplier) return;
+
+        if (currentDamageMultTimeTicks < _data.numberOfTicksToApplyDamageMult)
+        {
+            currentDamageMultTimeTicks += delta;
+        }
+
+        if (currentDamageMultTimeTicks >= _data.numberOfTicksToApplyDamageMult)
+        {
+            cumulativeDamMult += _data.damageMultToApplyAfterTicks;
+
+            currentDamageMultTimeTicks = 0.0f;
         }
     }
 }

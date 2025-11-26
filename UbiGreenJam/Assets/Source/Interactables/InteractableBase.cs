@@ -16,6 +16,14 @@ public class InteractableBase : MonoBehaviour
     public bool destroyOnPickup = false;
 
     [Header("Runtime State")]
+
+    [ReadOnlyInspector]
+    public bool allowPickUp { get; protected set; } = true;
+
+    [ReadOnlyInspector]
+    public bool damageable { get; protected set; } = true;
+
+    [ReadOnlyInspector]
     public bool isBeingHeld = false;
 
     [Header("UI")]
@@ -27,7 +35,11 @@ public class InteractableBase : MonoBehaviour
     [Tooltip("World-space offset for popup above the object")]
     public Vector3 popupOffset = new Vector3(0f, 0.6f, 0f);
 
-    public bool promptVisible { get; private set; } = false;
+    public bool promptVisible { get; protected set; } = false;
+
+    [Header("Destroy FX")]
+
+    public ParticleSystem destroyFXPrefabToSpawn;
 
     [Header("Prompt override (runtime)")]
     public string lockedPromptMessage = "";
@@ -65,6 +77,10 @@ public class InteractableBase : MonoBehaviour
         else itemMaxHealth = itemData.health;
 
         itemCurrentHealth = itemMaxHealth;
+
+        allowPickUp = itemData.isCarryable;
+
+        damageable = itemData.isDamageable;
     }
 
     private void OnEnable()
@@ -122,7 +138,7 @@ public class InteractableBase : MonoBehaviour
     }
 #endif
 
-    public void ShowPrompt()
+    public virtual void ShowPrompt()
     {
         if (isBeingHeld || itemData == null) return;
 
@@ -164,7 +180,7 @@ public class InteractableBase : MonoBehaviour
         //if(GameManager.Instance) GameManager.Instance.OpenPromf(gameObject.name, lockedPromptMessage, lockedPromptCost);
     }
 
-    public void HidePrompt()
+    public virtual void HidePrompt()
     {
         promptVisible = false;
         //if(GameManager.Instance) GameManager.Instance.ClosePromf();
@@ -174,9 +190,13 @@ public class InteractableBase : MonoBehaviour
 
     public void DeductInteractableHealth(float healthToDeduct)
     {
+        if (!itemData) return;
+
+        if (!itemData.isDamageable || !damageable) return;
+
         if(healthToDeduct < 0.0f) healthToDeduct = 0.0f;
 
-        itemCurrentHealth -= healthToDeduct;
+        itemCurrentHealth -= healthToDeduct * (itemData ? itemData.floodDamageMitigation : 1.0f);
 
         if(itemCurrentHealth <= 0.0f)
         {
@@ -189,6 +209,20 @@ public class InteractableBase : MonoBehaviour
         StopAllCoroutines();
 
         isPendingDestroy = true;
+
+        if (destroyFXPrefabToSpawn)
+        {
+            if (furnitureColliderRigidbodyData && furnitureColliderRigidbodyData.meshRend)
+            {
+                MeshRenderer meshRend = furnitureColliderRigidbodyData.meshRend;
+
+                Instantiate(destroyFXPrefabToSpawn.gameObject, meshRend.bounds.center, Quaternion.identity);
+            }
+            else
+            {
+                Instantiate(destroyFXPrefabToSpawn.gameObject, transform.position, Quaternion.identity);
+            }
+        }
 
         StartCoroutine(DestroyInteractableCoroutineDelay());
     }

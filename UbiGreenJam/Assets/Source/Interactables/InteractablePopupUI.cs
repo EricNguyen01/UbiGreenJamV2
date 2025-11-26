@@ -60,6 +60,11 @@ public class InteractablePopupUI : MonoBehaviour
 
     public void Show(string promptText, int cost)
     {
+        if (this.promptText)
+        {
+            this.promptText.text = promptText;
+        }
+
         if (!costText)
         {
             if (nameText)
