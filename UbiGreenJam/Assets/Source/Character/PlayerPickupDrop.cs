@@ -315,6 +315,7 @@ namespace GameCore
             {
                 currentJoint = heldRb.gameObject.AddComponent<FixedJoint>();
                 currentJoint.connectedBody = holdAnchorRb;
+
             }
             else
             {
@@ -335,14 +336,17 @@ namespace GameCore
         void Drop()
         {
             if (!heldRb || !interactableHeld) return;
+
             foreach (var joint in heldRb.GetComponents<FixedJoint>())
             {
                 Destroy(joint);
             }
+
             if (interactableHeld.furnitureColliderRigidbodyData)
             {
-                interactableHeld.furnitureColliderRigidbodyData.DisableFurnitureColliders(false, 0.1f);
+                interactableHeld.furnitureColliderRigidbodyData.DisableFurnitureColliders(false);
             }
+
             interactableHeld.isBeingHeld = false;
             interactableHeld.HidePrompt();
             interactableHeld.EnableInteractableOutline(false);
@@ -363,9 +367,11 @@ namespace GameCore
             {
                 GameManager.Instance.ClearHeldItem();
             }
+
             heldRb.isKinematic = pickUpOriginalKinematicState;
             heldRb.collisionDetectionMode = previousCollisionMode;
-            heldRb.interpolation = RigidbodyInterpolation.Interpolate;
+
+            //heldRb.interpolation = RigidbodyInterpolation.Interpolate;
 
             Vector3 impulse = transform.forward * dropImpulse.x + Vector3.up * dropImpulse.y;
             heldRb.AddForce(impulse, ForceMode.Impulse);
