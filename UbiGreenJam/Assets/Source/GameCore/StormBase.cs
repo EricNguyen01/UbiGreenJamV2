@@ -27,6 +27,8 @@ public class StormBase
     [field: ReadOnlyInspector]
     public bool IsFinished { get; private set; } = false;
 
+    private float baseStormDamage = 1.0f;
+
     private float cumulativeDamMult = 1.0f;
 
     private float currentDamageTimeTicks = 0.0f;
@@ -35,14 +37,17 @@ public class StormBase
 
     public StormBase(ScriptableStormData data)
     {
-        _data = data;
-        _elapsed = 0f;
-        IsFinished = false;
-
         if (!data)
         {
             Debug.LogError($"StormBase object doesn't have a valid ref to a ScriptableStormData. It won't work correctly!");
+
+            return;
         }
+
+        _data = data;
+        _elapsed = 0f;
+        IsFinished = false;
+        baseStormDamage = data.damagePerTick;
     } 
 
     public void StartStorm()
@@ -80,6 +85,8 @@ public class StormBase
 
         currentStormDamage = _data.damagePerTick;
 
+        baseStormDamage = _data.damagePerTick;
+
         cumulativeDamMult = 1.0f;
 
         currentDamageTimeTicks = 0.0f;
@@ -96,7 +103,7 @@ public class StormBase
 
         if(currentDamageTimeTicks >= _data.numberOfTicksToDealDamage)
         {
-            currentStormDamage *= (_data.allowCumulativeDamageMultiplier ? cumulativeDamMult : 1.0f);
+            currentStormDamage = baseStormDamage * (_data.allowCumulativeDamageMultiplier ? cumulativeDamMult : 1.0f);
 
             if (currentStormDamage > 99999999.0f) currentStormDamage = 99999999.0f;
 
