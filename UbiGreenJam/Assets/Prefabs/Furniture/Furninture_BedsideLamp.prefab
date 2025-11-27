@@ -5066,6 +5066,7 @@ MonoBehaviour:
   outlineMode: 0
   outlineColor: {r: 0, g: 1, b: 0.5008006, a: 1}
   outlineWidth: 10
+  BaseHealthOverlayMat: {fileID: 0}
 --- !u!114 &7901158642997774487
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5082,9 +5083,10 @@ MonoBehaviour:
   Group: 0
   prefixField: -1
   Synchronization: 3
-  OwnershipTransfer: 0
+  OwnershipTransfer: 1
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: -7745765084735419075}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -5103,7 +5105,7 @@ MonoBehaviour:
   m_SynchronizePosition: 1
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
-  m_UseLocal: 1
+  m_UseLocal: 0
 --- !u!1 &8460068913283169641
 GameObject:
   m_ObjectHideFlags: 0
