@@ -34,10 +34,15 @@ namespace GameCore
 
         public override void OnUpdate()
         {
-            elapsed += Time.deltaTime;
-            if (elapsed >= prepareTime)
+            float elapsed = gameManager.GetPhaseElapsed(); 
+            float remaining = gameManager.CurrentStorm.Prepare - elapsed; 
+
+            string msg = $"Storm starts in {GameManager.FormatTime(remaining)}"; 
+            gameManager.UpdateStormHUD(msg, "#EDBE24"); 
+
+            if (remaining <= 0f)
             {
-                gameManager.StartStormPhase();
+                gameManager.StartStormPhase(); 
             }
         }
 
@@ -70,6 +75,13 @@ namespace GameCore
                     gameManager.StartStormEndPhase();
                 }
             }
+            float elapsed = gameManager.GetPhaseElapsed(); 
+            float remaining = gameManager.CurrentStorm != null
+            ? Mathf.Max(0f, gameManager.CurrentStorm.Duration - elapsed)
+            : 0f; 
+
+            string msg = $"Storm ends in {GameManager.FormatTime(remaining)}";
+            gameManager.UpdateStormHUD(msg, "#EE6148");
         }
 
         public override void OnExit()
@@ -94,11 +106,16 @@ namespace GameCore
 
         public override void OnUpdate()
         {
-            t += Time.deltaTime;
-            if (t >= wrapTime)
+            float elapsed = gameManager.GetPhaseElapsed();
+            float remaining = gameManager.CurrentStorm != null
+            ? Mathf.Max(0f, gameManager.CurrentStorm.Duration - elapsed)
+            : 0f; 
+
+            string msg = $"Storm ends in {GameManager.FormatTime(remaining)}";
+            gameManager.UpdateStormHUD(msg, "#EE6148");
+
+            if (remaining <= 0f)
             {
-                // decide next state: start next prepare or end game
-                // Example: continue loop
                 gameManager.ChangeState(new PreparePhaseState(gameManager));
             }
         }

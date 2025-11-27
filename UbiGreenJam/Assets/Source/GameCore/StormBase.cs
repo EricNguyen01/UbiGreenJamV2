@@ -132,4 +132,10 @@ public class StormBase
             currentDamageMultTimeTicks = 0.0f;
         }
     }
+    public float Duration => _data != null ? _data.duration : 0f;
+    public float Prepare => _data != null ? _data.prepareTime : 0f;
+
+    public float Elapsed => _elapsed;
+
+    public float RemainingTime => Mathf.Max(0f, Duration - _elapsed);
 }

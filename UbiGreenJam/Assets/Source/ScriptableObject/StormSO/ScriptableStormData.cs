@@ -8,6 +8,9 @@ public class ScriptableStormData : ScriptableObject
 
     [field: SerializeField]
     public string stormName { get; private set; } = "DefaultStorm";
+    [field: SerializeField]
+    [field: Min(1.0f)]
+    public float prepareTime { get; private set; } = 10f;
 
     [field: SerializeField]
     [field: Min(1.0f)]

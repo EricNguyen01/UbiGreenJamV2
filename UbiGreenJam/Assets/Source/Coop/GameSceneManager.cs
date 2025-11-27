@@ -34,6 +34,7 @@ public class GameSceneManager : MonoBehaviour
         {
             PhotonNetwork.SendRate = 30;
             PhotonNetwork.SerializationRate = 30;
+            GameManager.Instance.OpenHUD(true);
         }
         if (GameManager.Instance)
         {
