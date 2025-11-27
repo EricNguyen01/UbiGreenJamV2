@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 
 namespace GameCore
@@ -12,7 +13,7 @@ namespace GameCore
         public Camera aimCamera;
 
         Rigidbody heldRb;
-
+        PhotonView heldPhotonView;
         // Anchor rigidbody used to keep a physical joint while preserving colliders
         Rigidbody holdAnchorRb;
 
@@ -29,6 +30,9 @@ namespace GameCore
         private Dictionary<Rigidbody, InteractableBase> interactableRigidbodyDict = new Dictionary<Rigidbody, InteractableBase>();
 
         private bool pickUpOriginalKinematicState = false;
+        [Header("Drop Tuning")]
+        public Vector3 dropImpulse = new Vector3(5f, 20f, 0f); 
+        PhotonView ownPV;
 
         void Start()
         {
@@ -78,7 +82,7 @@ namespace GameCore
             }
         }
 
-        /*void FixedUpdate()
+        void FixedUpdate()
         {
             if (Photon.Pun.PhotonNetwork.InRoom)
             {
@@ -92,14 +96,57 @@ namespace GameCore
 
                 holdAnchorRb.MoveRotation(holdPoint.rotation);
             }
-        }*/
+        }
 
         [Photon.Pun.PunRPC]
-        void RPC_SetHeld(bool held)
+        void RPC_SetHeldNetwork(int itemViewId, bool held)
         {
-            var interactable = heldRb.GetComponent<InteractableBase>();
-            if (interactable != null)
-                interactable.isBeingHeld = held;
+            if (itemViewId == 0) return;
+
+            PhotonView itemPV = PhotonView.Find(itemViewId);
+            if (itemPV == null) return;
+
+            InteractableBase interactable = itemPV.GetComponent<InteractableBase>();
+            if (!interactable) interactable = itemPV.GetComponentInChildren<InteractableBase>();
+            if (!interactable) interactable = itemPV.GetComponentInParent<InteractableBase>();
+            if (interactable == null) return;
+
+            interactable.isBeingHeld = held;
+
+            if (held)
+            {
+                if (interactable.furnitureColliderRigidbodyData)
+                {
+                    interactable.furnitureColliderRigidbodyData.DisableFurnitureColliders(true);
+                }
+
+                interactable.HidePrompt();
+                interactable.EnableInteractableOutline(false);
+            }
+            else
+            {
+                if (interactable.furnitureColliderRigidbodyData)
+                {
+                    interactable.furnitureColliderRigidbodyData.DisableFurnitureColliders(false);
+                }
+                var meshR = interactable.GetComponentInChildren<MeshRenderer>();
+                if (meshR != null) meshR.enabled = true;
+
+                interactable.HidePrompt();
+                interactable.EnableInteractableOutline(false);
+            }
+        }
+        void RPC_RemoveJoint(int itemViewId)
+        {
+            PhotonView itemPV = PhotonView.Find(itemViewId);
+            if (itemPV == null) return;
+
+            Rigidbody rb = itemPV.GetComponent<Rigidbody>();
+            if (rb == null) rb = itemPV.GetComponentInChildren<Rigidbody>();
+            if (rb == null) return;
+
+            ConfigurableJoint j = rb.GetComponent<ConfigurableJoint>();
+            if (j != null) Destroy(j);
         }
         void TryPickupInFront()
         {
@@ -213,20 +260,15 @@ namespace GameCore
 
         void Pickup(Rigidbody rb, InteractableBase interactable)
         {
+            heldPhotonView = rb.GetComponent<PhotonView>();
+            if (PhotonNetwork.InRoom && heldPhotonView != null)
+            {
+                heldPhotonView.TransferOwnership(PhotonNetwork.LocalPlayer);
+                Debug.Log($"[Pickup] Ownership requested → IsMine: {heldPhotonView.IsMine}, Owner: {heldPhotonView.Owner}");
+            }
             if (!rb) return;
 
             if(!interactable) return;
-
-            //TOO HEAVY -> NOT PICK UP AND RETURN
-
-            if (interactable.itemData != null && interactable.itemData.weight > 1f)
-            {
-                interactable.ShowTemporaryMessage("Too heavy for one to carry!", interactable.itemData.cost, 1.5f);
-
-                return;
-            }
-
-            //NOT TOO HEAVY -> PICKUP-ABLE CODE BELOW
 
             heldRb = rb;
 
@@ -271,7 +313,8 @@ namespace GameCore
 
             if (holdPoint)
             {
-                heldRb.transform.SetParent(holdPoint);
+                currentJoint = heldRb.gameObject.AddComponent<FixedJoint>();
+                currentJoint.connectedBody = holdAnchorRb;
             }
             else
             {
@@ -291,85 +334,52 @@ namespace GameCore
 
         void Drop()
         {
-            if (!heldRb) return;
-
-            if (!interactableHeld) return;
-
-            InteractableBase interactable;
-
-            if (!interactableRigidbodyDict.TryGetValue(heldRb, out interactable)) return;
-
-            if (interactable != interactableHeld) return;
-
-            if (currentJoint) currentJoint.connectedBody = null;
-
-            if(heldRb.transform.parent) heldRb.transform.SetParent(null);
-
-            heldRb.isKinematic = false;
-
-            heldRb.AddForce(transform.forward * 50.0f + Vector3.up * 200.0f, ForceMode.Impulse);
-
+            if (!heldRb || !interactableHeld) return;
+            foreach (var joint in heldRb.GetComponents<FixedJoint>())
+            {
+                Destroy(joint);
+            }
             if (interactableHeld.furnitureColliderRigidbodyData)
             {
                 interactableHeld.furnitureColliderRigidbodyData.DisableFurnitureColliders(false, 0.1f);
             }
+            interactableHeld.isBeingHeld = false;
+            interactableHeld.HidePrompt();
+            interactableHeld.EnableInteractableOutline(false);
 
             if (interactableHeld.dogAI)
             {
                 interactableHeld.dogAI.SetHeld(false);
             }
 
-            interactableHeld.isBeingHeld = false;
-
-            interactableHeld.HidePrompt();
-
-            interactableHeld.EnableInteractableOutline(false);
-
-            if (currentInteractableLookAt && currentInteractableLookAt != interactableHeld)
+            if (currentInteractableLookAt && currentInteractableLookAt == interactableHeld)
             {
                 currentInteractableLookAt.HidePrompt();
-
                 currentInteractableLookAt.EnableInteractableOutline(false);
-
                 currentInteractableLookAt = null;
             }
 
-            if (GameManager.Instance) GameManager.Instance.ClearHeldItem();
-
-            if (currentJoint != null)
+            if (GameManager.Instance)
             {
-                Destroy(currentJoint);
-
-                currentJoint = null;
+                GameManager.Instance.ClearHeldItem();
             }
-
             heldRb.isKinematic = pickUpOriginalKinematicState;
-
-            pickUpOriginalKinematicState = false;
-
             heldRb.collisionDetectionMode = previousCollisionMode;
+            heldRb.interpolation = RigidbodyInterpolation.Interpolate;
+
+            Vector3 impulse = transform.forward * dropImpulse.x + Vector3.up * dropImpulse.y;
+            heldRb.AddForce(impulse, ForceMode.Impulse);
+
+            if (PhotonNetwork.InRoom && heldPhotonView != null && heldPhotonView.IsMine)
+            {
+                heldPhotonView.TransferOwnership(PhotonNetwork.MasterClient);
+            }
 
             heldRb = null;
-        }
-
-
-        void OnDrawGizmosSelected()
-        {
-            Gizmos.color = Color.yellow;
-            Vector3 origin;
-            Vector3 dir;
-            if (aimCamera != null)
-            {
-                origin = aimCamera.transform.position;
-                dir = aimCamera.transform.forward;
-            }
-            else
-            {
-                origin = transform.position + Vector3.up * 0.5f;
-                dir = transform.forward;
-            }
-            Gizmos.DrawLine(origin, origin + dir * pickupRange);
-            Gizmos.DrawWireSphere(origin + dir * pickupRange, 0.05f);
+            interactableHeld = null;
+            heldPhotonView = null;
+            currentJoint = null;
+            pickUpOriginalKinematicState = false;
         }
     }
 }

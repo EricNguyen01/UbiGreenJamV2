@@ -176,16 +176,6 @@ namespace GameCore
             //Debug.Log("Player is holding: " + item.itemData.itemName);
         }
 
-        /*
-        public void OpenPromf(string name, string promf, int code)
-        {
-            _uiManager?.Show(name, promf, code);
-        }
-        public void ClosePromf()
-        {
-            _uiManager?.Hide();
-        }*/
-
         public void ClearHeldItem()
         {
             Debug.Log("Player dropped item");
