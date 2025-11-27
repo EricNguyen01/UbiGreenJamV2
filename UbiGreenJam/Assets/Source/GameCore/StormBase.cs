@@ -98,6 +98,8 @@ public class StormBase
         {
             currentStormDamage *= (_data.allowCumulativeDamageMultiplier ? cumulativeDamMult : 1.0f);
 
+            if (currentStormDamage > 99999999.0f) currentStormDamage = 99999999.0f;
+
             if (FloodController.FloodControllerInstance)
             {
                 FloodController.FloodControllerInstance.DamageInteractablesInFloodTrigger();

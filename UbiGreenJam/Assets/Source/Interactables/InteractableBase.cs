@@ -203,11 +203,11 @@ public class InteractableBase : MonoBehaviour
 
         itemCurrentHealth -= healthToDeduct * (itemData ? itemData.floodDamageMitigation : 1.0f);
 
-        float normalizedCurrentHP = itemCurrentHealth / itemMaxHealth;
+        float inversedNormalizedCurrentHP = 1.0f - (itemCurrentHealth / itemMaxHealth);
 
         if (furnitureColliderRigidbodyData)
         {
-            furnitureColliderRigidbodyData.SetHealthOverlayShaderValue(normalizedCurrentHP);
+            furnitureColliderRigidbodyData.SetHealthOverlayShaderValue(inversedNormalizedCurrentHP);
         }
 
         if(itemCurrentHealth <= 0.0f)

@@ -312,13 +312,6 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
         instantiatedHealthOverlayMat.SetFloat("_Float", 0.0f);
     }
 
-    public void SetHealthOverlayShaderValue(float minHPVal, float maxHPVal)
-    {
-        float normalizedHPVal = minHPVal / maxHPVal;
-
-        SetHealthOverlayShaderValue(normalizedHPVal);
-    }
-
     public void SetHealthOverlayShaderValue(float value)
     {
         if(!instantiatedHealthOverlayMat) return;
