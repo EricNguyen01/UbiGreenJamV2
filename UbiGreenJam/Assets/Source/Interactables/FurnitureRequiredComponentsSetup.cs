@@ -287,19 +287,27 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
 
         instantiatedHealthOverlayMat = Instantiate(BaseHealthOverlayMat);
 
-        meshRend.SetMaterials(new List<Material>() { instantiatedHealthOverlayMat });
+        HelperFunction.AddUniqueMaterial(meshRend, instantiatedHealthOverlayMat);
 
-        float lowestPoint = meshRend.bounds.min.x;
+        MeshFilter meshFilter = meshRend.GetComponent<MeshFilter>();
 
-        float highestPoint = meshRend.bounds.max.y;
+        if(!meshFilter) meshRend.AddComponent<MeshFilter>();
 
-        float currentPivot_Y = meshRend.transform.position.y;
+        Mesh mesh = meshFilter.sharedMesh;
 
-        float top = lowestPoint - currentPivot_Y;
+        Bounds b = mesh.bounds;
 
-        float bot = highestPoint - currentPivot_Y;
+        Vector3 localLowest = b.min;
+        Vector3 localHighest = b.max;
 
-        instantiatedHealthOverlayMat.SetVector("_TopBot", new Vector4(top, bot));
+        Vector3 worldLowest = meshRend.transform.TransformPoint(localLowest);
+        Vector3 worldHighest = meshRend.transform.TransformPoint(localHighest);
+
+        float top = worldLowest.y - meshRend.transform.position.y;
+
+        float bottom = worldHighest.y - meshRend.transform.position.y;
+
+        instantiatedHealthOverlayMat.SetVector("_TopBot", new Vector4(top, bottom));
 
         instantiatedHealthOverlayMat.SetFloat("_Float", 0.0f);
     }
@@ -312,8 +320,8 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
 
         if (value > 1.0f) value = 1.0f;
 
+        value = (float)System.Math.Round(value, 1);
+
         instantiatedHealthOverlayMat.SetFloat("_Float", value);
-
-
     }
 }

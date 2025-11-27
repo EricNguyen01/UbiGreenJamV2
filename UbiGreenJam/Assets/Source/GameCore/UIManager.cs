@@ -29,6 +29,13 @@ public class UIManager : MonoBehaviour
     public CanvasGroup m_PauseMenu;
     public Button[] pauseButtons; 
     public TextMeshProUGUI[] pauseButtonTexts; 
+    [Header("House Value HUD")]
+    public TextMeshProUGUI houseValueText;
+    public Image houseValueBar;
+    public GameObject houseValueHUD;
+    public TextMeshProUGUI stormPhaseText;
+    private float maxHouseValue = 0f;
+    private float currentHouseValue = 0f;
 
     public float fadeDuration = 0.3f;
     private bool isPaused = false;
@@ -55,6 +62,10 @@ public class UIManager : MonoBehaviour
         {
             TogglePauseMenu();
         }
+        if (houseValueHUD != null && houseValueHUD.activeSelf)
+        {
+            UpdateHouseValueHUD();
+        }
     }
     void TogglePauseMenu()
     {
@@ -67,7 +78,43 @@ public class UIManager : MonoBehaviour
             ShowPauseMenu();
         }
     }
+    public void UpdateHouseValueHUD()
+    {
+        currentHouseValue = 0f;
+        foreach (var item in GameManager.Instance.interactablesInSceneRuntime)
+        {
+            if (item != null && item.itemData != null)
+            {
+                currentHouseValue += item.itemData.cost;
+            }
+        }
 
+        if (maxHouseValue <= 0f)
+        {
+            maxHouseValue = currentHouseValue;
+        }
+
+        if (houseValueText != null)
+            houseValueText.text = $"₫ {Mathf.RoundToInt(currentHouseValue)}";
+
+        if (houseValueBar != null)
+            houseValueBar.fillAmount = Mathf.Clamp01(currentHouseValue / maxHouseValue);
+    }
+    public void UpdateStormPhaseText(string message, string hexColor)
+    {
+        if (stormPhaseText == null) return;
+
+        Color color;
+        if (ColorUtility.TryParseHtmlString(hexColor, out color))
+            stormPhaseText.color = color;
+
+        stormPhaseText.text = message;
+    }
+    public void ShowHouseValueHUD(bool show)
+    {
+        if (houseValueHUD != null)
+            houseValueHUD.SetActive(show);
+    }
     void ShowPauseMenu()
     {
         StopAllCoroutines();

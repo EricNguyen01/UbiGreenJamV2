@@ -19,6 +19,20 @@ public class FMODEvents : MonoBehaviour
     [field: Header("Drain Unclogging Sound")]
     [field: SerializeField] public EventReference DrainUnclog { get; private set; }
 
+    [field: Header("Ground Land SFX")]
+    [field: SerializeField] public EventReference GroundLand { get; private set; }
+
+    [field: Header("Water Land SFX")]
+    [field: SerializeField] public EventReference WaterLand { get; private set; }
+
+    [field: Header("Water Jump SFX")]
+    [field: SerializeField] public EventReference WaterJump { get; private set; }
+
+    [field: Header("Footsteps SFX")]
+    [field: SerializeField] public EventReference FootstepsSFX { get; private set; }
+
+    [field: Header("Swimming SFX")]
+    [field: SerializeField] public EventReference SwimmingSFX { get; private set; }
 
     public static FMODEvents Instance { get; private set; }
 

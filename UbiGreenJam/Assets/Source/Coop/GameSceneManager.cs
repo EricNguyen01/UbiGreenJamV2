@@ -34,9 +34,13 @@ public class GameSceneManager : MonoBehaviour
         {
             PhotonNetwork.SendRate = 30;
             PhotonNetwork.SerializationRate = 30;
+            GameManager.Instance.OpenHUD(true);
         }
-        if(GameManager.Instance) GameManager.Instance.ForceCloseLobby();
-        GameManager.Instance.turnOffEV(false);
+        if (GameManager.Instance)
+        {
+            GameManager.Instance.ForceCloseLobby();
+            GameManager.Instance.turnOffEV(false);
+        }
     }
     private PlayerCharacter SpawnLocalPlayer()
     {
