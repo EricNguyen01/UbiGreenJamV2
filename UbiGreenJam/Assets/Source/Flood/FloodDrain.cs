@@ -1,4 +1,5 @@
 using System.Collections;
+using Photon.Pun;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
@@ -145,10 +146,36 @@ public class FloodDrain : InteractableBase
         if (Input.GetKeyDown(unclogKey))
         {
             if (!requirePlayerInTrigger || playerInside)
+            if (PhotonNetwork.InRoom)
+            {
+                PhotonView pv = GetComponent<PhotonView>();
+                if (pv != null)
+                {
+                    pv.RPC(nameof(RPC_UnclogDrain), RpcTarget.AllBuffered);
+                }
+            }
+            else
+            {
                 Unclog();
+            }
         }
     }
-
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(clogLevel);
+        }
+        else
+        {
+            clogLevel = (float)stream.ReceiveNext();
+        }
+    }
+    [PunRPC]
+    public void RPC_UnclogDrain()
+    {
+        Unclog();
+    }
     public void Unclog()
     {
         if (clogLevel <= 0f) return;
