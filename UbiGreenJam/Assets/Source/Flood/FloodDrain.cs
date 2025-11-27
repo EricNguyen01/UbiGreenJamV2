@@ -88,6 +88,10 @@ public class FloodDrain : InteractableBase
     static readonly int BaseColorID = Shader.PropertyToID("_BaseColor");
     static readonly int EmissionColorID = Shader.PropertyToID("_EmissionColor");
 
+    private float updateDrainPopupTextTime = 0.2f;
+
+    private float currentDrainPopupTextUpdateTime = 0.0f;
+
     void Start()
     {
         if (!flood) flood = FindAnyObjectByType<FloodController>();
@@ -297,20 +301,32 @@ public class FloodDrain : InteractableBase
 
     public override void ShowPrompt()
     {
-        //TODO: Update text in interval, not every frame...
+        promptVisible = true;
 
         string unclogStr = $"{unclogKey} - Unclog";
 
         if (clogLevel <= 0.0f) unclogStr = "No Clog";
 
-        if (popupUI) popupUI.Show(unclogStr, 0);
+        if(currentDrainPopupTextUpdateTime > 0.0f && currentDrainPopupTextUpdateTime <= updateDrainPopupTextTime)
+        {
+            currentDrainPopupTextUpdateTime += Time.deltaTime;
+        }
 
-        promptVisible = true;
+        if(currentDrainPopupTextUpdateTime <= 0.0f || currentDrainPopupTextUpdateTime > updateDrainPopupTextTime)
+        {
+            currentDrainPopupTextUpdateTime = 0.0f;
+
+            if (popupUI) popupUI.Show(unclogStr, 0);
+
+            currentDrainPopupTextUpdateTime += Time.deltaTime;
+        }
+
     }
 
     public override void HidePrompt()
     {
-        //TODO: Reset show prompt text update interval time
+        currentDrainPopupTextUpdateTime = 0.0f;
+
         base.HidePrompt();
     }
 
