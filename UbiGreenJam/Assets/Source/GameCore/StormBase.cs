@@ -96,7 +96,7 @@ public class StormBase
 
         if(currentDamageTimeTicks >= _data.numberOfTicksToDealDamage)
         {
-            currentStormDamage *= (_data.allowCumulativeDamageMultiplier ? cumulativeDamMult : 1.0f) * _data.roundDamageMultiplier;
+            currentStormDamage *= (_data.allowCumulativeDamageMultiplier ? cumulativeDamMult : 1.0f);
 
             if (FloodController.FloodControllerInstance)
             {

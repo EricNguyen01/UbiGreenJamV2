@@ -26,6 +26,15 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
     [Range(0.0f, 10.0f)]
     private float outlineWidth = 5.0f;
 
+    [Header("Furniture Health Overlay Material")]
+
+    [SerializeField]
+    private Material BaseHealthOverlayMat;
+
+    private Material instantiatedHealthOverlayMat;
+
+    //INTERNALS -------------------------------------------------------------------------------------------------------------------
+
     private Rigidbody rb;
 
     private List<Collider> colliders = new List<Collider>();
@@ -85,6 +94,8 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
         if(!interactableDamageReceiver) interactableDamageReceiver = meshRend.AddComponent<InteractableDamageReceiver>();
 
         interactableDamageReceiver.InitDamageReceiver(interactableUsing);
+
+        SetupHealthOverlayMat();
 
         meshRend.gameObject.isStatic = false;
 
@@ -266,5 +277,41 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
         outlineComp.OutlineWidth = outlineWidth;
 
         outlineComp.precomputeOutline = true;
+    }
+
+    private void SetupHealthOverlayMat()
+    {
+        if (!BaseHealthOverlayMat) return;
+
+        if (!meshRend) return;
+
+        instantiatedHealthOverlayMat = Instantiate(BaseHealthOverlayMat);
+
+        meshRend.SetMaterials(new List<Material>() { instantiatedHealthOverlayMat });
+
+        float lowestPoint = meshRend.bounds.min.x;
+
+        float highestPoint = meshRend.bounds.max.y;
+
+        float currentPivot_Y = meshRend.transform.position.y;
+
+        float top = lowestPoint - currentPivot_Y;
+
+        float bot = highestPoint - currentPivot_Y;
+
+        instantiatedHealthOverlayMat.SetVector("_TopBot", new Vector4(top, bot));
+
+        instantiatedHealthOverlayMat.SetFloat("_Float", 0.0f);
+    }
+
+    public void SetHealthOverlayShaderValue(float value)
+    {
+        if(!instantiatedHealthOverlayMat) return;
+
+        if (value < 0.0f) value = 0.0f;
+
+        if (value > 1.0f) value = 1.0f;
+
+        instantiatedHealthOverlayMat.SetFloat("_Float", value);
     }
 }

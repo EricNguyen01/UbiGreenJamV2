@@ -164,6 +164,11 @@ public class InteractableBase : MonoBehaviour
 
         int cost = itemData.cost;
 
+        if (itemData.useCostAsHealth)
+        {
+            cost = Mathf.RoundToInt(itemCurrentHealth);
+        }
+
         promptVisible = true;
 
         //GameManager.Instance.OpenPromf(name, prompt, cost);
@@ -197,6 +202,13 @@ public class InteractableBase : MonoBehaviour
         if(healthToDeduct < 0.0f) healthToDeduct = 0.0f;
 
         itemCurrentHealth -= healthToDeduct * (itemData ? itemData.floodDamageMitigation : 1.0f);
+
+        float normalizedCurrentHP = itemCurrentHealth / itemMaxHealth;
+
+        if (furnitureColliderRigidbodyData)
+        {
+            furnitureColliderRigidbodyData.SetHealthOverlayShaderValue(normalizedCurrentHP);
+        }
 
         if(itemCurrentHealth <= 0.0f)
         {
