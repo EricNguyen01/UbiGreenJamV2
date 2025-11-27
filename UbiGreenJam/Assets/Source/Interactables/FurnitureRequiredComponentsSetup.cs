@@ -1,9 +1,11 @@
+using DG.Tweening;
 using GameCore;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 
 [DisallowMultipleComponent]
 public class FurnitureRequiredComponentsSetup : MonoBehaviour
@@ -170,6 +172,16 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
         EnableOutline(false);
     }
 
+    private void Update()
+    {
+        if (meshRend)
+        {
+            instantiatedHealthOverlayMat.SetFloat("_MinY", meshRend.bounds.min.y - 0.1f);
+
+            instantiatedHealthOverlayMat.SetFloat("_MaxY", meshRend.bounds.max.y);
+        }
+    }
+
     public void DisableFurnitureColliders(bool disabled)
     {
         if(colliders == null || colliders.Count == 0) return;
@@ -289,25 +301,9 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
 
         HelperFunction.AddUniqueMaterial(meshRend, instantiatedHealthOverlayMat);
 
-        MeshFilter meshFilter = meshRend.GetComponent<MeshFilter>();
+        instantiatedHealthOverlayMat.SetFloat("_MinY", meshRend.bounds.min.y - 0.1f);
 
-        if(!meshFilter) meshRend.AddComponent<MeshFilter>();
-
-        Mesh mesh = meshFilter.sharedMesh;
-
-        Bounds b = mesh.bounds;
-
-        Vector3 localLowest = b.min;
-        Vector3 localHighest = b.max;
-
-        Vector3 worldLowest = meshRend.transform.TransformPoint(localLowest);
-        Vector3 worldHighest = meshRend.transform.TransformPoint(localHighest);
-
-        float top = worldLowest.y - meshRend.transform.position.y;
-
-        float bottom = worldHighest.y - meshRend.transform.position.y;
-
-        instantiatedHealthOverlayMat.SetVector("_TopBot", new Vector4(top, bottom));
+        instantiatedHealthOverlayMat.SetFloat("_MaxY", meshRend.bounds.max.y);
 
         instantiatedHealthOverlayMat.SetFloat("_Float", 0.0f);
     }
@@ -316,12 +312,14 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
     {
         if(!instantiatedHealthOverlayMat) return;
 
-        if (value < 0.0f) value = 0.0f;
-
-        if (value > 1.0f) value = 1.0f;
-
         value = (float)System.Math.Round(value, 1);
 
-        instantiatedHealthOverlayMat.SetFloat("_Float", value);
+        float currentFloat = instantiatedHealthOverlayMat.GetFloat("_Float");
+
+        DOTween.To(() => currentFloat, x => currentFloat = x, value, 0.1f)
+            .OnUpdate(() =>
+            {
+                instantiatedHealthOverlayMat.SetFloat("_Float", Mathf.Clamp01(currentFloat));
+            });
     }
 }
