@@ -313,5 +313,7 @@ public class FurnitureRequiredComponentsSetup : MonoBehaviour
         if (value > 1.0f) value = 1.0f;
 
         instantiatedHealthOverlayMat.SetFloat("_Float", value);
+
+
     }
 }
