@@ -81,7 +81,7 @@ public class FloodDamageTriggerZone : MonoBehaviour
         }
     }
 
-    private IEnumerator EnableFloodDamageTickCoroutine()
+    /*private IEnumerator EnableFloodDamageTickCoroutine()
     {
         if (!floodParent || !triggerCollider) yield break;
 
@@ -134,5 +134,5 @@ public class FloodDamageTriggerZone : MonoBehaviour
         interactableDamageReceiver.TakeDamage(damageToDeal);
 
         alreadyDamagedInteractables.Add(interactableDamageReceiver);
-    }
+    }*/
 }
