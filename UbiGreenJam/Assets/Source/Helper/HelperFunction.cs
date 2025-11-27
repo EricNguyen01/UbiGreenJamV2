@@ -4,11 +4,11 @@ using UnityEngine;
 
 public static class HelperFunction
 {
-    public static string InsertDotsEvery3CharInNum(string inputNum)
+    public static string FormatCostWithDots(string costText)
     {
-        var digits = new string(inputNum.Where(char.IsDigit).ToArray());
+        var digits = new string(costText.Where(char.IsDigit).ToArray());
 
-        if (digits.Length == 0) return inputNum;
+        if (digits.Length == 0) return costText;
 
         var chars = digits.Reverse().ToList();
 
@@ -25,5 +25,20 @@ public static class HelperFunction
         result.Reverse();
 
         return new string(result.ToArray());
+    }
+
+    public static void AddUniqueMaterial(Renderer renderer, Material newMat)
+    {
+        if (!renderer || !newMat) return;
+
+        var mats = renderer.materials;
+
+        if (mats.Contains(newMat)) return;
+
+        System.Array.Resize(ref mats, mats.Length + 1);
+
+        mats[mats.Length - 1] = newMat;
+
+        renderer.materials = mats;
     }
 }

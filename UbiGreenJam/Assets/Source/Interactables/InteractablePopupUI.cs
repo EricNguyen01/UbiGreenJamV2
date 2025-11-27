@@ -77,7 +77,7 @@ public class InteractablePopupUI : MonoBehaviour
             }
         }
 
-        string costToText = HelperFunction.InsertDotsEvery3CharInNum(cost.ToString());
+        string costToText = HelperFunction.FormatCostWithDots(cost.ToString());
 
         if(costText) costText.text = $"{costToText}";
 

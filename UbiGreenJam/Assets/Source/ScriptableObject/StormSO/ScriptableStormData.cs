@@ -41,11 +41,11 @@ public class ScriptableStormData : ScriptableObject
     public float numberOfTicksToApplyDamageMult { get; private set; } = 5.0f;
 
     [field: SerializeField]
-    [field: Min(1.0f)]
+    [field: Min(0.05f)]
     [field: Tooltip("The cumulative damage multiplier after number of ticks have passed. " +
     "For example, each 2 secs, add this mult to the total cumulative mult to apply back to the base damage")]
     [field: DisableIf("applyDamageMultAfterTicks", false)]
-    public float damageMultToApplyAfterTicks { get; private set; } = 1.5f;
+    public float damageMultToApplyAfterTicks { get; private set; } = 1.0f;
 
     // Add more parameters: spawn patterns, triggers, thresholds...
 }
