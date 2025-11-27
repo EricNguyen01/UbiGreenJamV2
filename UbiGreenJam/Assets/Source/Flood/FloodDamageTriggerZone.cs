@@ -43,11 +43,42 @@ public class FloodDamageTriggerZone : MonoBehaviour
 
     public void DamageInteractablesInFloodTrigger()
     {
-        if (!floodParent || !triggerCollider) return;
+        if (!floodParent || !triggerCollider)
+        {
+            Debug.LogWarning("[FLOOD] No floodParent or triggerCollider");
+            return;
+        }
+        Bounds b = triggerCollider.bounds;
+        Vector3 center = b.center;
+        Vector3 halfExtents = b.extents;
 
-        if(isProcessingDamageTick) StopCoroutine(EnableFloodDamageTickCoroutine());
+        float damageToDeal = GameManager.Instance?.CurrentStorm?.currentStormDamage ?? 1f;
+        if (GameManager.Instance && GameManager.Instance.CurrentStorm != null)
+            damageToDeal = GameManager.Instance.CurrentStorm.currentStormDamage;
 
-        StartCoroutine(EnableFloodDamageTickCoroutine());
+        Collider[] hits = Physics.OverlapBox(
+            center,
+            halfExtents,
+            Quaternion.identity,
+            ~0, 
+            QueryTriggerInteraction.Collide
+        );
+        Debug.Log($"[FLOOD] OverlapBox found {hits.Length} colliders");
+        alreadyDamagedInteractables.Clear();
+
+        foreach (var col in hits)
+        {
+            if (!col) continue;
+
+            if (col.TryGetComponent(out InteractableDamageReceiver receiver))
+            {
+                Debug.Log($"[FLOOD] Damaging {receiver.name} with {damageToDeal}");
+                if (alreadyDamagedInteractables.Contains(receiver)) continue;
+                receiver.TakeDamage(damageToDeal);
+
+                alreadyDamagedInteractables.Add(receiver);
+            }
+        }
     }
 
     private IEnumerator EnableFloodDamageTickCoroutine()
