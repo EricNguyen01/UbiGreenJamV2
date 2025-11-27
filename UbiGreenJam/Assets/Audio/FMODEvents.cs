@@ -13,6 +13,13 @@ public class FMODEvents : MonoBehaviour
     [field: SerializeField] public EventReference AmbienceSound { get; private set; }
 
 
+    [field: Header("Drain Interaction Sound")]
+    [field: SerializeField] public EventReference DrainInteraction { get; private set; }
+
+    [field: Header("Drain Unclogging Sound")]
+    [field: SerializeField] public EventReference DrainUnclog { get; private set; }
+
+
     public static FMODEvents Instance { get; private set; }
 
     private void Awake()
