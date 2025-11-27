@@ -30,8 +30,13 @@ public class GameSceneManager : MonoBehaviour
     void Start()
     {
         localPlayerChar = SpawnLocalPlayer();
-
+        if (PhotonNetwork.InRoom)
+        {
+            PhotonNetwork.SendRate = 30;
+            PhotonNetwork.SerializationRate = 30;
+        }
         if(GameManager.Instance) GameManager.Instance.ForceCloseLobby();
+        GameManager.Instance.turnOffEV(false);
     }
     private PlayerCharacter SpawnLocalPlayer()
     {
