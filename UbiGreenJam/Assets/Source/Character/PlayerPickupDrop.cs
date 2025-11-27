@@ -34,6 +34,8 @@ namespace GameCore
         public Vector3 dropImpulse = new Vector3(5f, 20f, 0f); 
         PhotonView ownPV;
 
+        private Vector3 smoothVel;
+
         void Start()
         {
             if (holdPoint == null)
@@ -82,7 +84,7 @@ namespace GameCore
             }
         }
 
-        void FixedUpdate()
+        /*void FixedUpdate()
         {
             if (Photon.Pun.PhotonNetwork.InRoom)
             {
@@ -90,13 +92,13 @@ namespace GameCore
                     return;
             }
             // Move the kinematic anchor to the hold point position using MovePosition/MoveRotation so physics can resolve collisions
-            if (holdAnchorRb != null)
+            if (heldRb != null && holdPoint)
             {
-                holdAnchorRb.MovePosition(holdPoint.position);
+                //heldRb.transform.position = Vector3.SmoothDamp(heldRb.transform.position, holdPoint.transform.position, ref smoothVel, Time.fixedDeltaTime, 10.0f);
 
-                holdAnchorRb.MoveRotation(holdPoint.rotation);
+                //holdAnchorRb.MoveRotation(holdPoint.rotation);
             }
-        }
+        }*/
 
         [Photon.Pun.PunRPC]
         void RPC_SetHeldNetwork(int itemViewId, bool held)
@@ -186,6 +188,7 @@ namespace GameCore
                 Pickup(rb, interactable);
             }
         }
+
         void CheckForInteractablePrompt()
         {
             if (heldRb) return;
@@ -261,11 +264,13 @@ namespace GameCore
         void Pickup(Rigidbody rb, InteractableBase interactable)
         {
             heldPhotonView = rb.GetComponent<PhotonView>();
+
             if (PhotonNetwork.InRoom && heldPhotonView != null)
             {
                 heldPhotonView.TransferOwnership(PhotonNetwork.LocalPlayer);
                 Debug.Log($"[Pickup] Ownership requested → IsMine: {heldPhotonView.IsMine}, Owner: {heldPhotonView.Owner}");
             }
+
             if (!rb) return;
 
             if(!interactable) return;
@@ -301,6 +306,8 @@ namespace GameCore
 
             if (GameManager.Instance) GameManager.Instance.SetHeldItem(interactable);
 
+            if(heldRb.transform.parent) heldRb.transform.SetParent(null);
+
             if (currentJoint != null)
             {
                 Destroy(currentJoint);
@@ -311,23 +318,16 @@ namespace GameCore
             heldRb.linearVelocity = Vector3.zero;
             heldRb.angularVelocity = Vector3.zero;
 
-            if (holdPoint)
-            {
-                currentJoint = heldRb.gameObject.AddComponent<FixedJoint>();
-                currentJoint.connectedBody = holdAnchorRb;
+            currentJoint = heldRb.gameObject.AddComponent<FixedJoint>();
 
-            }
-            else
-            {
-                heldRb.transform.SetParent(null);
-            }
+            if (holdAnchorRb) currentJoint.connectedBody = holdAnchorRb;
 
             previousCollisionMode = heldRb.collisionDetectionMode;
 
             heldRb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
-            currentJoint = heldRb.gameObject.AddComponent<FixedJoint>();
-            currentJoint.connectedBody = holdAnchorRb;
+            heldRb.interpolation = RigidbodyInterpolation.Interpolate;
+
             currentJoint.breakForce = Mathf.Infinity;
             currentJoint.breakTorque = Mathf.Infinity;
             currentJoint.enableCollision = false;
@@ -337,10 +337,23 @@ namespace GameCore
         {
             if (!heldRb || !interactableHeld) return;
 
-            foreach (var joint in heldRb.GetComponents<FixedJoint>())
+            /*foreach (var joint in heldRb.GetComponents<FixedJoint>())
             {
                 Destroy(joint);
+            }*/
+
+            if (currentJoint != null)
+            {
+                Destroy(currentJoint);
+
+                currentJoint = null;
             }
+
+            heldRb.isKinematic = pickUpOriginalKinematicState;
+
+            heldRb.collisionDetectionMode = previousCollisionMode;
+
+            heldRb.interpolation = RigidbodyInterpolation.None;
 
             if (interactableHeld.furnitureColliderRigidbodyData)
             {
@@ -348,7 +361,9 @@ namespace GameCore
             }
 
             interactableHeld.isBeingHeld = false;
+
             interactableHeld.HidePrompt();
+
             interactableHeld.EnableInteractableOutline(false);
 
             if (interactableHeld.dogAI)
@@ -356,7 +371,7 @@ namespace GameCore
                 interactableHeld.dogAI.SetHeld(false);
             }
 
-            if (currentInteractableLookAt && currentInteractableLookAt == interactableHeld)
+            if (currentInteractableLookAt && currentInteractableLookAt != interactableHeld)
             {
                 currentInteractableLookAt.HidePrompt();
                 currentInteractableLookAt.EnableInteractableOutline(false);
@@ -368,13 +383,9 @@ namespace GameCore
                 GameManager.Instance.ClearHeldItem();
             }
 
-            heldRb.isKinematic = pickUpOriginalKinematicState;
-            heldRb.collisionDetectionMode = previousCollisionMode;
+            //Vector3 impulse = transform.forward * dropImpulse.x + Vector3.up * dropImpulse.y;
 
-            //heldRb.interpolation = RigidbodyInterpolation.Interpolate;
-
-            Vector3 impulse = transform.forward * dropImpulse.x + Vector3.up * dropImpulse.y;
-            heldRb.AddForce(impulse, ForceMode.Impulse);
+            heldRb.AddForce(transform.forward * 50.0f + Vector3.up * 200.0f, ForceMode.Impulse);
 
             if (PhotonNetwork.InRoom && heldPhotonView != null && heldPhotonView.IsMine)
             {
@@ -384,7 +395,7 @@ namespace GameCore
             heldRb = null;
             interactableHeld = null;
             heldPhotonView = null;
-            currentJoint = null;
+            //currentJoint = null;
             pickUpOriginalKinematicState = false;
         }
     }

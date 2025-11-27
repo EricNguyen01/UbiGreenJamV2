@@ -77,7 +77,9 @@ public class InteractablePopupUI : MonoBehaviour
             }
         }
 
-        if(costText) costText.text = $"{cost}";
+        string costToText = HelperFunction.InsertDotsEvery3CharInNum(cost.ToString());
+
+        if(costText) costText.text = $"{costToText}";
 
         ///FMOD PLAY PICKUP SOUND
         if (AudioManager.Instance && !hasPlayedSound)
