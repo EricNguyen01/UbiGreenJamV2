@@ -29,9 +29,11 @@ public class GameSceneManager : MonoBehaviour
     }
     void Start()
     {
+        var ui = GameManager.Instance.GetUIManager();
         localPlayerChar = SpawnLocalPlayer();
         if (PhotonNetwork.InRoom)
         {
+            ui.SetGameplayMode(true);
             PhotonNetwork.SendRate = 30;
             PhotonNetwork.SerializationRate = 30;
             GameManager.Instance.OpenHUD(true);

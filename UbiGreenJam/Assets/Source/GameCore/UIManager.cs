@@ -48,6 +48,17 @@ public class UIManager : MonoBehaviour
     public Sprite rainMediumSprite;
     public Sprite rainHeavySprite;
     public Sprite rainExtremeSprite;
+    [Header("End Game Popup")]
+    public GameObject endGamePopup;            
+    public TextMeshProUGUI endReportText;
+    public GameObject RSBtn;
+    public GameObject BackBtn;
+    public GameObject RSMultiBtn;
+    private bool isInGameplay = false;
+    [Header("Loading Popup")]
+    public GameObject loadingPopup;
+    public TextMeshProUGUI loadingText;
+    public bool isLoading = false;
 
     public void Start()
     {
@@ -65,9 +76,13 @@ public class UIManager : MonoBehaviour
 
         PauseMenu.gameObject.SetActive(false);
     }
+    public void SetGameplayMode(bool active)
+    {
+        isInGameplay = active;
+    }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (isInGameplay && Input.GetKeyDown(KeyCode.Escape))
         {
             TogglePauseMenu();
         }
@@ -86,6 +101,62 @@ public class UIManager : MonoBehaviour
         {
             ShowPauseMenu();
         }
+    }
+    public IEnumerator ShowLoadingPopup(float duration)
+    {
+        if (loadingPopup == null || loadingText == null) yield break;
+
+        loadingPopup.SetActive(true);
+        isLoading = true;
+
+        float elapsed = 0f;
+        int dotCount = 0;
+
+        while (elapsed < duration)
+        {
+            dotCount = (dotCount + 1) % 4; 
+            string dots = new string('.', dotCount);
+            loadingText.text = $"Loading{dots}";
+
+            yield return new WaitForSeconds(0.5f);
+            elapsed += 0.5f;
+        }
+
+        loadingPopup.SetActive(false);
+        isLoading = false;
+    }
+    public void ShowEndReport(int lossVND)
+    {
+        if (!endGamePopup || !endReportText) return;
+
+        string formattedLoss = HelperFunction.FormatCostWithDots(lossVND.ToString());
+        endReportText.text =
+            "STORM REPORT\n\n" +
+            $"You lost <color=#EDBE24>{formattedLoss} VND</color> worth of belongings.\n" +
+            "For many families, real flood damage is far greater and life-changing.\n" +
+            "If you'd like to help, please consider donating:\n\n" +
+            "LINK : https://www.peacetreesvietnam.org/news-events/central-vietnam-flood-relief.html";
+
+        endGamePopup.SetActive(true);
+        bool isMultiplayer = PhotonNetwork.IsConnected && PhotonNetwork.InRoom;
+        var mouseLook = GameSceneManager.GameSceneManagerInstance.localPlayerChar.GetComponent<MouseLook>();
+        if (mouseLook) mouseLook.SetMouseEnabled(true);
+        if(PhotonNetwork.InRoom || PhotonNetwork.IsMasterClient)
+        {
+            RSBtn.SetActive(false);
+            BackBtn.SetActive(false);
+            RSMultiBtn.SetActive(true);
+        }
+        else
+        {
+            RSBtn.SetActive(true);
+            BackBtn.SetActive(true);
+            RSMultiBtn.SetActive(false);
+        }
+    }
+    public void HideEndReport()
+    {
+        if (endGamePopup) endGamePopup.SetActive(false);
     }
     public void UpdateHouseValueHUD()
     {
@@ -205,14 +276,14 @@ public class UIManager : MonoBehaviour
         HidePauseMenu();
     }
 
-    void RestartGame()
+    public void RestartGame()
     {
         HidePauseMenu();
         Time.timeScale = 1f;
         GameManager.Instance.RestartGame(); 
     }
 
-    void BackToMainMenu()
+    public void BackToMainMenu()
     {
         HidePauseMenu();
         Time.timeScale = 1f;

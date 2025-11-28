@@ -18,6 +18,9 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
     public float stormDuration = 120f;
     private UIManager ui;
     public RainLevel[] syncedRainForecast = new RainLevel[5];
+    private int startHouseValue = 0;
+    private int endHouseValue = 0;
+    private bool endPopupShown = false;
 
     private void Awake()
     {
@@ -28,10 +31,15 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
         }
         Instance = this;
     }
-
+    private bool IsUILoading()
+    {
+        var ui = GameManager.Instance.GetUIManager();
+        return ui != null && ui.isLoading;
+    }
     void Start()
     {
-        var ui = GameManager.Instance?.GetUIManager();
+        var ui = GameManager.Instance.GetUIManager();
+        endPopupShown = false;
 
         if (PhotonNetwork.IsMasterClient || !PhotonNetwork.InRoom)
         {
@@ -50,6 +58,7 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
 
     private void Update()
     {
+        if (IsUILoading()) return;
         if (PhotonNetwork.IsMasterClient || !PhotonNetwork.InRoom)
         {
             CalculateAndSyncHouseValue();
@@ -60,6 +69,7 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
     }
     void SyncRainForecast()
     {
+        var ui = GameManager.Instance.GetUIManager();
         var flood = FloodController.FloodControllerInstance;
         if (flood == null) return;
 
@@ -69,19 +79,20 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
         {
             photonView.RPC(nameof(RPC_SyncRainForecast), RpcTarget.AllBuffered, (int)syncedRainForecast[0], (int)syncedRainForecast[1], (int)syncedRainForecast[2], (int)syncedRainForecast[3], (int)syncedRainForecast[4]);
         }
+        else
+        {
+            ui.UpdateRainForecastUI(syncedRainForecast);
+        }
     }
 
     public void CalculateAndSyncHouseValue()
     {
         int total = 0;
-        if (GameManager.Instance)
+        foreach (var item in GameManager.Instance.interactablesInSceneRuntime)
         {
-            foreach (var item in GameManager.Instance.interactablesInSceneRuntime)
+            if (item != null && item.itemData != null)
             {
-                if (item != null && item.itemData != null)
-                {
-                    total += item.itemData.cost;
-                }
+                total += item.itemData.cost;
             }
         }
 
@@ -97,7 +108,7 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
         {
             syncedHouseValue = total;
             if (syncedMaxHouseValue <= 0) syncedMaxHouseValue = total;
-            if(GameManager.Instance) GameManager.Instance.UpdateHouseValue();
+            GameManager.Instance.UpdateHouseValue();
         }
     }
 
@@ -111,7 +122,7 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
 
     private void UpdateFloodHUD()
     {
-        var ui = GameManager.Instance?.GetUIManager();
+        var ui = GameManager.Instance.GetUIManager();
         if (ui == null || ui.stormPhaseText == null) return;
         var flood = FloodController.FloodControllerInstance;
         if (flood == null) return;
@@ -139,8 +150,34 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
             {
                 floodActive = false;
                 flood.StopFlood();
+                EndFloodAndShowReport();
             }
         }
+    }
+    private void EndFloodAndShowReport()
+    {
+        var flood = FloodController.FloodControllerInstance;
+        if (flood == null) return;
+
+        floodActive = false;
+        flood.StopFlood();
+
+        endHouseValue = syncedHouseValue;
+        int loss = Mathf.Max(0, startHouseValue - endHouseValue);
+
+        if (endPopupShown) return; 
+        endPopupShown = true;
+
+        if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
+        {
+            photonView.RPC(nameof(RPC_ShowEndReport), RpcTarget.AllBuffered, loss);
+        }
+        else if (!PhotonNetwork.InRoom)
+        {
+            GameManager.Instance.GetUIManager()?.ShowEndReport(loss);
+        }
+
+        Debug.Log($"[Flood] Ended. start={startHouseValue}, end={endHouseValue}, loss={loss}");
     }
 
     private void ControlFlood()
@@ -154,6 +191,8 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
         {
             floodActive = true;
             flood.StartFlood();
+            startHouseValue = syncedHouseValue;
+            endPopupShown = false;
         }
 
         if (floodActive && flood.GetNormalizedFloodLevel() >= 1f)
@@ -192,5 +231,9 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
 
         GameManager.Instance.GetUIManager()?.UpdateRainForecastUI(syncedRainForecast);
     }
-
+    [PunRPC]
+    void RPC_ShowEndReport(int loss)
+    {
+        GameManager.Instance.GetUIManager()?.ShowEndReport(loss);
+    }
 }
