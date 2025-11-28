@@ -9,9 +9,11 @@ public class FMODEvents : MonoBehaviour
     [field: Header("Pickup SFX")]
     [field: SerializeField] public EventReference PickupSFX { get; private set; }
 
+    [field: Header("Throw SFX")]
+    [field: SerializeField] public EventReference ThrowDropSFX { get; private set; }
+
     [field: Header("Ambience Sound")]
     [field: SerializeField] public EventReference AmbienceSound { get; private set; }
-
 
     [field: Header("Drain Interaction Sound")]
     [field: SerializeField] public EventReference DrainInteraction { get; private set; }
@@ -21,6 +23,8 @@ public class FMODEvents : MonoBehaviour
 
     [field: Header("Swimming SFX")]
     [field: SerializeField] public EventReference SwimmingSFX { get; private set; }
+
+
 
     public static FMODEvents Instance { get; private set; }
 
