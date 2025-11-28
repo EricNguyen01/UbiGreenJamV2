@@ -64,6 +64,14 @@ public class PlayerCharacter : CharacterBase
         characterMouseLook.InitCharacterComponentFrom(this);
 
         if (!characterPickupDrop) characterPickupDrop = GetComponent<PlayerPickupDrop>();
+
+        if(!characterPickupDrop) characterPickupDrop = gameObject.AddComponent<PlayerPickupDrop>();
+
+        if(characterPickupDrop) characterPickupDrop.InitCharacterComponentFrom(this);
+
+        if(!characterAnimator) characterAnimator = GetComponent<Animator>();
+
+        if(!characterAnimator) characterAnimator = GetComponentInChildren<Animator>();
     }
 
     void Start()

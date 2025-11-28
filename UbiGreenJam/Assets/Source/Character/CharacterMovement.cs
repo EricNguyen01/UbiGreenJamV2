@@ -17,6 +17,8 @@ public class CharacterMovement : CharacterComponentBase
     [SerializeField] private float gravity = -16f;
     [SerializeField] private float jumpForce = 6f;
 
+    private bool isWalking;
+
     [Header("Ground Check Settings")]
     [Tooltip("Which layers count as ground")]
     [SerializeField] private LayerMask groundMask;
@@ -160,6 +162,24 @@ public class CharacterMovement : CharacterComponentBase
         // -------- SPEED --------
         float targetSpeed = walkSpeed;
 
+        if(Mathf.Approximately(input.x, 0.0f) && Mathf.Approximately(input.y, 0.0f))
+        {
+            if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("Walking", false);
+        }
+        else
+        {
+            if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("Walking", true);
+
+            if (inWater)
+            {
+                if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("SlowWalk", true);
+            }
+            else
+            {
+                if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("SlowWalk", false);
+            }
+        }
+
         if (inWater)
         {
             if (isSwimming)
@@ -239,6 +259,11 @@ public class CharacterMovement : CharacterComponentBase
                 // Normal land jump
                 velocity.y = jumpForce;
             }
+
+            if (!isSwimming)
+            {
+                if (characterUsingComponent) characterUsingComponent.SetAnimatorTrigger("Jump");
+            }
         }
 
         // -------- GRAVITY + BUOYANCY --------
@@ -290,6 +315,8 @@ public class CharacterMovement : CharacterComponentBase
         {
             float control = airControl;
 
+            if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("IsGrounded", false);
+
             // In water, especially when deeper, give more control so it feels like swimming
             if (inWater)
                 control = Mathf.Lerp(airControl, 1f, submergedAmount);
@@ -304,6 +331,10 @@ public class CharacterMovement : CharacterComponentBase
 
             if (inWater)
                 moveVelocity *= (1f - waterAirDrag);
+        }
+        else
+        {
+            if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("IsGrounded", true);
         }
 
         // -------- FINAL MOVE --------

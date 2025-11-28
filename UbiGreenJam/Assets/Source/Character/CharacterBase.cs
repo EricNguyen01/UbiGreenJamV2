@@ -8,6 +8,10 @@ public abstract class CharacterBase : MonoBehaviour
     [SerializeField]
     public CharacterSOBase characterSOData;
 
+    [field: Header("Character Animation")]
+
+    [field: SerializeField] public Animator characterAnimator { get; protected set; }
+
     protected virtual void Awake()
     {
         if (!characterSOData)
@@ -23,5 +27,26 @@ public abstract class CharacterBase : MonoBehaviour
         }
 
         characterSOData = Instantiate(characterSOData);
+    }
+
+    public void SetAnimatorTrigger(string triggerName)
+    {
+        if (!characterAnimator) return;
+
+        characterAnimator.SetTrigger(triggerName);
+    }
+
+    public void SetAnimatorBool(string boolName, bool boolState)
+    {
+        if (!characterAnimator) return;
+
+        characterAnimator.SetBool(boolName, boolState);
+    }
+
+    public void SetAnimatorLayerWeight(int layer, float weight)
+    {
+        if (!characterAnimator) return;
+
+        characterAnimator.SetLayerWeight(layer, weight);
     }
 }

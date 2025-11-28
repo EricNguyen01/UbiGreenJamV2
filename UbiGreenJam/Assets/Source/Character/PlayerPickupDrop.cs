@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace GameCore
 {
-    public class PlayerPickupDrop : MonoBehaviour
+    public class PlayerPickupDrop : CharacterComponentBase
     {
         [Header("Pickup Settings")]
         public float pickupRange = 3f;
@@ -331,6 +331,13 @@ namespace GameCore
             currentJoint.breakForce = Mathf.Infinity;
             currentJoint.breakTorque = Mathf.Infinity;
             currentJoint.enableCollision = false;
+
+            if (characterUsingComponent)
+            {
+                characterUsingComponent.SetAnimatorBool("Holding", true);
+
+                characterUsingComponent.SetAnimatorLayerWeight(1, 1.0f);
+            }
         }
 
         void Drop()
@@ -349,6 +356,13 @@ namespace GameCore
                 Destroy(currentJoint);
 
                 currentJoint = null;
+            }
+
+            if (characterUsingComponent)
+            {
+                characterUsingComponent.SetAnimatorBool("Holding", false);
+
+                characterUsingComponent.SetAnimatorLayerWeight(1, 0.0f);
             }
 
             heldRb.isKinematic = pickUpOriginalKinematicState;
