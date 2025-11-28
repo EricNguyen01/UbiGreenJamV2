@@ -215,7 +215,7 @@ public class LobbyUIManager : MonoBehaviourPunCallbacks
         {
             RoomOptions options = new RoomOptions
             {
-                MaxPlayers = 4,
+                MaxPlayers = 2,
                 IsVisible = true, 
                 IsOpen = true
             };
@@ -235,7 +235,9 @@ public class LobbyUIManager : MonoBehaviourPunCallbacks
 
                 if (canStart)
                 {
+                    var _uiManager = GameManager.Instance.GetUIManager();
                     PhotonNetwork.LoadLevel(gameSceneToLoad);
+                    _uiManager.StartCoroutine(_uiManager.ShowLoadingPopup(5f));
                     GameManager.Instance.turnOffEV(false);
                     if (lobbyPanel != null) lobbyPanel.SetActive(false);
                     if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
@@ -515,7 +517,7 @@ public class LobbyUIManager : MonoBehaviourPunCallbacks
 
             if (action == PendingAction.JoinOrCreateRoom)
             {
-                RoomOptions options = new RoomOptions { MaxPlayers = 4, IsVisible = true, IsOpen = true };
+                RoomOptions options = new RoomOptions { MaxPlayers = 2, IsVisible = true, IsOpen = true };
                 PhotonNetwork.JoinOrCreateRoom(rn, options, TypedLobby.Default);
             }
             else if (action == PendingAction.JoinRoom)

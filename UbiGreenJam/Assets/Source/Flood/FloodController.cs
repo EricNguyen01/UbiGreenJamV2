@@ -157,7 +157,7 @@ public class FloodController : MonoBehaviour
         currentRiseSpeed = baseRiseSpeed * intensityMultipliers[currentIntensity];
         targetRiseSpeed = currentRiseSpeed;
 
-        isRising = startRisingOnPlay;
+        isRising = false;
 
         UpdateScaleAndPosition();
         UpdateVisualWater();

@@ -124,8 +124,10 @@ namespace GameCore
                 {
                     _uiManager?.ShowUI(false);
                     _uiManager?.ShowHouseValueHUD(true);
+                    _uiManager?.StartCoroutine(_uiManager.ShowLoadingPopup(5f));
                     turnOffEV(false);
                     StartPreparePhase();
+                    _uiManager?.SetGameplayMode(true);
                     Debug.Log("Game Scene Loaded, UI hidden");
                 };
         }
@@ -176,9 +178,12 @@ namespace GameCore
                     _uiManager.m_MainMenu.blocksRaycasts = true;
                     _uiManager?.ShowHouseValueHUD(false);
                     _uiManager.Tutorial.SetActive(false);
+                    _uiManager.endGamePopup.SetActive(false);
+                    _uiManager.InfoPopup.SetActive(false);
                     _uiManager.Credits.SetActive(false);
                     _uiManager.Lobby.SetActive(false);
                     _uiManager.PauseMenu.SetActive(false);
+                    _uiManager.SetGameplayMode(false);
                     turnOffEV(true);
                 }
 
