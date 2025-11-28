@@ -7,14 +7,24 @@ public class FMOD_CharacterSFX : MonoBehaviour
     private int MaterialValue;
     private RaycastHit rh;
     private float distance = 0.3f;
-    private string EventPathFootsteps = "event:/Footsteps";
-    private string EventPathLanded = "event:/LandGround";
-    private string EventPathJump = "event:/LandGround";
     private PARAMETER_ID ParamID;
     private PARAMETER_ID ParamID2;
     private LayerMask lm;
+    /*
+    private string EventPathFootsteps = "event:/Footsteps";
+    private string EventPathLanded = "event:/LandGround";
+    private string EventPathJump = "event:/LandGround";
+    */
 
-    
+    [field: Header("Footsteps")]
+    [field: SerializeField] public EventReference FootstepsSFX { get; private set; }
+
+    [field: Header("Landed")]
+    [field: SerializeField] public EventReference LandedSFX { get; private set; }
+
+    [field: Header("Jump")]
+    [field: SerializeField] public EventReference JumpSFX { get; private set; }
+
     //Section Used for finding FMOD parameter ID number (instead of name)
     /*
     private EventDescription EventDes;
@@ -51,7 +61,7 @@ public class FMOD_CharacterSFX : MonoBehaviour
     {
         // Start with material check then instantiate sound
         MaterialCheck();
-        EventInstance Walk = RuntimeManager.CreateInstance(EventPathFootsteps);
+        EventInstance Walk = RuntimeManager.CreateInstance(FootstepsSFX);
         RuntimeManager.AttachInstanceToGameObject(Walk, transform.gameObject, GetComponent<Rigidbody>());
 
         // Sets the Terrain parameter
@@ -66,7 +76,7 @@ public class FMOD_CharacterSFX : MonoBehaviour
 
     void PlayLandedEvent() 
     {
-        EventInstance Landed = RuntimeManager.CreateInstance(EventPathFootsteps);
+        EventInstance Landed = RuntimeManager.CreateInstance(LandedSFX);
         RuntimeManager.AttachInstanceToGameObject(Landed, transform.gameObject, GetComponent<Rigidbody>());
 
         // Sets the Terrain parameter
@@ -81,7 +91,7 @@ public class FMOD_CharacterSFX : MonoBehaviour
 
     void PlayJumpEvent()
     {
-        EventInstance Jump = RuntimeManager.CreateInstance(EventPathJump);
+        EventInstance Jump = RuntimeManager.CreateInstance(JumpSFX);
         RuntimeManager.AttachInstanceToGameObject(Jump, transform.gameObject, GetComponent<Rigidbody>());
 
         // Sets the Terrain parameter
