@@ -65,10 +65,10 @@ public class FMOD_CharacterSFX : MonoBehaviour
         RuntimeManager.AttachInstanceToGameObject(Walk, transform.gameObject, GetComponent<Rigidbody>());
 
         // Sets the Terrain parameter
-        Walk.setParameterByID(ParamID, MaterialValue, false);
+        Walk.setParameterByName("Ground-Water", MaterialValue);
 
-        // Can be used as alternative to IDs
-        // Run.setParameterByName("Terrain", MaterialValue);
+        /*Walk.setParameterByID(ParamID, MaterialValue, false); */
+
 
         Walk.start();
         Walk.release();
@@ -80,7 +80,7 @@ public class FMOD_CharacterSFX : MonoBehaviour
         RuntimeManager.AttachInstanceToGameObject(Landed, transform.gameObject, GetComponent<Rigidbody>());
 
         // Sets the Terrain parameter
-        Landed.setParameterByID(ParamID, MaterialValue, false);
+        Landed.setParameterByName("Ground-Water", MaterialValue);
         // Can be used as alternative to IDs
         // Run.setParameterByName("Terrain", MaterialValue);
 
@@ -91,11 +91,14 @@ public class FMOD_CharacterSFX : MonoBehaviour
 
     void PlayJumpEvent()
     {
+        /*Debug.Log("SFX Played"); */
+
+
         EventInstance Jump = RuntimeManager.CreateInstance(JumpSFX);
         RuntimeManager.AttachInstanceToGameObject(Jump, transform.gameObject, GetComponent<Rigidbody>());
 
         // Sets the Terrain parameter
-        Jump.setParameterByID(ParamID, MaterialValue, false);
+        Jump.setParameterByName("Ground-Water", MaterialValue);
 
         // Can be used as alternative to IDs
         // Run.setParameterByName("Terrain", MaterialValue);
