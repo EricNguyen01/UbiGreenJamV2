@@ -402,6 +402,7 @@ namespace GameCore
             //Vector3 impulse = transform.forward * dropImpulse.x + Vector3.up * dropImpulse.y;
 
             heldRb.AddForce(transform.forward * 50.0f + Vector3.up * 200.0f, ForceMode.Impulse);
+            if (AudioManager.Instance) AudioManager.Instance.PlayOneShot(FMODEvents.Instance.ThrowDropSFX, transform.position);
 
             if (PhotonNetwork.InRoom && heldPhotonView != null && heldPhotonView.IsMine)
             {
