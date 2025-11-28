@@ -37,9 +37,6 @@ namespace GameCore
             float elapsed = gameManager.GetPhaseElapsed(); 
             float remaining = gameManager.CurrentStorm.Prepare - elapsed; 
 
-            string msg = $"Storm starts in {GameManager.FormatTime(remaining)}"; 
-            gameManager.UpdateStormHUD(msg, "#EDBE24"); 
-
             if (remaining <= 0f)
             {
                 gameManager.StartStormPhase(); 
@@ -79,9 +76,6 @@ namespace GameCore
             float remaining = gameManager.CurrentStorm != null
             ? Mathf.Max(0f, gameManager.CurrentStorm.Duration - elapsed)
             : 0f; 
-
-            string msg = $"Storm ends in {GameManager.FormatTime(remaining)}";
-            gameManager.UpdateStormHUD(msg, "#EE6148");
         }
 
         public override void OnExit()
@@ -110,9 +104,6 @@ namespace GameCore
             float remaining = gameManager.CurrentStorm != null
             ? Mathf.Max(0f, gameManager.CurrentStorm.Duration - elapsed)
             : 0f; 
-
-            string msg = $"Storm ends in {GameManager.FormatTime(remaining)}";
-            gameManager.UpdateStormHUD(msg, "#EE6148");
 
             if (remaining <= 0f)
             {
