@@ -95,7 +95,7 @@ public class UIManager : MonoBehaviour
         }
 
         if (houseValueText != null)
-            houseValueText.text = $"₫ {Mathf.RoundToInt(currentHouseValue)}";
+            houseValueText.text = $"₫ {HelperFunction.FormatCostWithDots(Mathf.RoundToInt(currentHouseValue).ToString())}";
 
         if (houseValueBar != null)
             houseValueBar.fillAmount = Mathf.Clamp01(currentHouseValue / maxHouseValue);
