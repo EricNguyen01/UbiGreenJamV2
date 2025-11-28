@@ -91,19 +91,13 @@ public class LobbyUIManager : MonoBehaviourPunCallbacks
     
     public void OpenLobby()
     {
-        if (!PhotonNetwork.IsConnected || !PhotonNetwork.IsConnectedAndReady)
-        {
-            LobbyLauncher.Instance.ConnectAndJoinLobby();
-        }
-        else if (!PhotonNetwork.InLobby)
-        {
-            PhotonNetwork.JoinLobby();
-        }
+        LobbyLauncher.Instance.ConnectAndJoinLobby();
 
         if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
         if (lobbyPanel != null) lobbyPanel.SetActive(true);
 
         selectedSlot = -1;
+        cachedRoomList.Clear();
         RefreshSlotUIAll();
     }
 
@@ -219,7 +213,12 @@ public class LobbyUIManager : MonoBehaviourPunCallbacks
 
         if (!PhotonNetwork.InRoom)
         {
-            RoomOptions options = new RoomOptions { MaxPlayers = 4 };
+            RoomOptions options = new RoomOptions
+            {
+                MaxPlayers = 4,
+                IsVisible = true, 
+                IsOpen = true
+            };
             PhotonNetwork.JoinOrCreateRoom(rn, options, TypedLobby.Default);
         }
         else
@@ -497,13 +496,14 @@ public class LobbyUIManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         Debug.Log("[LobbyUI] OnConnectedToMaster: Joining Lobby...");
-        PhotonNetwork.JoinLobby();
     }
 
     public override void OnJoinedLobby()
     {
         Debug.Log("[LobbyUI] OnJoinedLobby: lobby list ready.");
         SetControlsInteractable(true);
+
+        cachedRoomList.Clear();
         RefreshSlotUIAll();
 
         if (!string.IsNullOrEmpty(pendingRoomToCreateOrJoin))
@@ -515,7 +515,7 @@ public class LobbyUIManager : MonoBehaviourPunCallbacks
 
             if (action == PendingAction.JoinOrCreateRoom)
             {
-                RoomOptions options = new RoomOptions { MaxPlayers = 4 };
+                RoomOptions options = new RoomOptions { MaxPlayers = 4, IsVisible = true, IsOpen = true };
                 PhotonNetwork.JoinOrCreateRoom(rn, options, TypedLobby.Default);
             }
             else if (action == PendingAction.JoinRoom)

@@ -5,6 +5,7 @@ using System.Collections;
 using UnityEngine.UI;
 using Photon.Pun;
 using UnityEngine.EventSystems;
+using static FloodController;
 public class UIManager : MonoBehaviour
 {
     [Header("UI Promf")]
@@ -39,6 +40,14 @@ public class UIManager : MonoBehaviour
 
     public float fadeDuration = 0.3f;
     private bool isPaused = false;
+    [Header("Rain Forecast UI")]
+    public Image nowRainImage;
+    public Image[] slotRainImages = new Image[4]; 
+    public Sprite rainSprite;
+    public Sprite rainLightSprite;
+    public Sprite rainMediumSprite;
+    public Sprite rainHeavySprite;
+    public Sprite rainExtremeSprite;
 
     public void Start()
     {
@@ -80,25 +89,16 @@ public class UIManager : MonoBehaviour
     }
     public void UpdateHouseValueHUD()
     {
-        currentHouseValue = 0f;
-        foreach (var item in GameManager.Instance.interactablesInSceneRuntime)
-        {
-            if (item != null && item.itemData != null)
-            {
-                currentHouseValue += item.itemData.cost;
-            }
-        }
+        int current = HouseValueSyncManager.Instance.syncedHouseValue;
+        int max = HouseValueSyncManager.Instance.syncedMaxHouseValue;
 
-        if (maxHouseValue <= 0f)
-        {
-            maxHouseValue = currentHouseValue;
-        }
+        if (max <= 0) max = current;
 
         if (houseValueText != null)
-            houseValueText.text = $"₫ {HelperFunction.FormatCostWithDots(Mathf.RoundToInt(currentHouseValue).ToString())}";
+            houseValueText.text = $"₫ {HelperFunction.FormatCostWithDots(Mathf.RoundToInt(current).ToString())}";
 
         if (houseValueBar != null)
-            houseValueBar.fillAmount = Mathf.Clamp01(currentHouseValue / maxHouseValue);
+            houseValueBar.fillAmount = Mathf.Clamp01((float)current / max);
     }
     public void UpdateStormPhaseText(string message, string hexColor)
     {
@@ -115,6 +115,32 @@ public class UIManager : MonoBehaviour
         if (houseValueHUD != null)
             houseValueHUD.SetActive(show);
     }
+    public void UpdateRainForecastUI(RainLevel[] forecast)
+    {
+        if (forecast == null || forecast.Length < 5) return;
+
+        nowRainImage.sprite = GetRainSprite(forecast[0]);
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (slotRainImages[i] != null)
+                slotRainImages[i].sprite = GetRainSprite(forecast[i + 1]);
+        }
+    }
+
+    private Sprite GetRainSprite(RainLevel level)
+    {
+        switch (level)
+        {
+            case RainLevel.VeryLight: return rainSprite;
+            case RainLevel.Light: return rainLightSprite;
+            case RainLevel.Medium: return rainMediumSprite;
+            case RainLevel.Heavy: return rainHeavySprite;
+            case RainLevel.Extreme: return rainExtremeSprite;
+            default: return null;
+        }
+    }
+
     void ShowPauseMenu()
     {
         StopAllCoroutines();

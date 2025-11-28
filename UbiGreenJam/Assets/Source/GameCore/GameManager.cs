@@ -147,6 +147,10 @@ namespace GameCore
                     Debug.Log("Game restarted");
                 };
         }
+        public UIManager GetUIManager()
+        {
+            return _uiManager;
+        }
         public void UpdateHouseValue()
         {
             _uiManager?.UpdateHouseValueHUD();

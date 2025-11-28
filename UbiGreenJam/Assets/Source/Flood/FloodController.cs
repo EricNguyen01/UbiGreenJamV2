@@ -66,6 +66,18 @@ public class FloodController : MonoBehaviour
     public FloodDamageTriggerZone floodDamageTriggerComponent { get; private set; }
 
     public static FloodController FloodControllerInstance;
+    public enum RainLevel
+    {
+        VeryLight = 0,
+        Light = 1,
+        Medium = 2,
+        Heavy = 3,
+        Extreme = 4
+    }
+    [Header("Rain Forecast")]
+    public RainLevel[] rainForecast = new RainLevel[5];
+    private float rainUpdateTimer = 0f;
+    private float rainUpdateInterval = 5f;
     // --------------------------------------------------------
 
     private void Awake()
@@ -105,7 +117,35 @@ public class FloodController : MonoBehaviour
 
         floodDamageTriggerComponent.InitFloodDamageComponent(this, floodTriggerCollider);
     }
+    // public void UpdateRainForecastBasedOnGameplay()
+    // {
+    //     RainLevel nowRain = RainLevel.Light;
 
+    //     float normalized = GetNormalizedFloodLevel(); 
+    //     if (normalized >= 0.9f)
+    //         nowRain = RainLevel.Extreme;
+    //     else if (normalized >= 0.6f)
+    //         nowRain = RainLevel.Heavy;
+    //     else if (normalized >= 0.4f)
+    //         nowRain = RainLevel.Medium;
+    //     else if (normalized >= 0.2f)
+    //         nowRain = RainLevel.Light;
+    //     else 
+    //         nowRain = RainLevel.VeryLight;
+    //     for (int i = 5; i > 0; i--)
+    //     {
+    //         rainForecast[i] = rainForecast[i - 1];
+    //     }
+
+    //     rainForecast[0] = nowRain;
+    // }
+    void GenerateRainForecast()
+    {
+        for (int i = 0; i < rainForecast.Length; i++)
+        {
+            rainForecast[i] = (RainLevel)Random.Range(0, 4); 
+        }
+    }
     void Start()
     {
         if (!playerFlood)
@@ -170,6 +210,12 @@ public class FloodController : MonoBehaviour
 
             UpdateScaleAndPosition();
             UpdateVisualWater();
+        }
+        rainUpdateTimer += Time.deltaTime;
+        if (rainUpdateTimer >= rainUpdateInterval)
+        {
+            GenerateRainForecast();
+            rainUpdateTimer = 0f;
         }
     }
 
