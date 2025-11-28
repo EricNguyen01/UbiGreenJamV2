@@ -342,6 +342,8 @@ namespace GameCore
                 Destroy(joint);
             }*/
 
+            if (heldRb.transform.parent) heldRb.transform.SetParent(null);
+
             if (currentJoint != null)
             {
                 Destroy(currentJoint);
