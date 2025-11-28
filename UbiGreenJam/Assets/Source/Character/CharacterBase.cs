@@ -43,10 +43,12 @@ public abstract class CharacterBase : MonoBehaviour
         characterAnimator.SetBool(boolName, boolState);
     }
 
-    public void SetAnimatorLayerWeight(int layer, float weight)
+    public void SetAnimatorLayerWeight(string layer, float weight)
     {
         if (!characterAnimator) return;
 
-        characterAnimator.SetLayerWeight(layer, weight);
+        int upperBodyIndex = characterAnimator.GetLayerIndex(layer);
+
+        characterAnimator.SetLayerWeight(upperBodyIndex, weight);
     }
 }

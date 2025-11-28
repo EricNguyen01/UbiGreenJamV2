@@ -31,7 +31,7 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
 
     void Start()
     {
-        var ui = GameManager.Instance.GetUIManager();
+        var ui = GameManager.Instance?.GetUIManager();
 
         if (PhotonNetwork.IsMasterClient || !PhotonNetwork.InRoom)
         {
@@ -74,11 +74,14 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
     public void CalculateAndSyncHouseValue()
     {
         int total = 0;
-        foreach (var item in GameManager.Instance.interactablesInSceneRuntime)
+        if (GameManager.Instance)
         {
-            if (item != null && item.itemData != null)
+            foreach (var item in GameManager.Instance.interactablesInSceneRuntime)
             {
-                total += item.itemData.cost;
+                if (item != null && item.itemData != null)
+                {
+                    total += item.itemData.cost;
+                }
             }
         }
 
@@ -94,7 +97,7 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
         {
             syncedHouseValue = total;
             if (syncedMaxHouseValue <= 0) syncedMaxHouseValue = total;
-            GameManager.Instance.UpdateHouseValue();
+            if(GameManager.Instance) GameManager.Instance.UpdateHouseValue();
         }
     }
 
@@ -108,7 +111,7 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
 
     private void UpdateFloodHUD()
     {
-        var ui = GameManager.Instance.GetUIManager();
+        var ui = GameManager.Instance?.GetUIManager();
         if (ui == null || ui.stormPhaseText == null) return;
         var flood = FloodController.FloodControllerInstance;
         if (flood == null) return;

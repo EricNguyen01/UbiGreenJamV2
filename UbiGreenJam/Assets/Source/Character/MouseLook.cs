@@ -6,6 +6,8 @@ public class MouseLook : CharacterComponentBase
     [Header("Mouse Look Components")]
     [SerializeField] public Camera playerCam { get; private set; }
 
+    [SerializeField] private Transform playerCamHeadParent;
+
     [Header("Sensitivity")]
     [SerializeField] private float horizontalSensitivity = 450f;
     [SerializeField] private float verticalSensitivity = 450f;
@@ -24,6 +26,7 @@ public class MouseLook : CharacterComponentBase
     [SerializeField] private bool disableOtherMainCameras = true;
 
     [Header("Crouch Camera")]
+    [SerializeField] private bool enableCrouchCamAdjust = true;
     [Tooltip("Camera local Y when standing.")]
     [SerializeField] private float standCamY = 1.0f;
     [Tooltip("Camera local Y when crouched (visual only).")]
@@ -87,11 +90,12 @@ public class MouseLook : CharacterComponentBase
         }
 
         // 4) Make sure it's parented to player and positioned correctly
+        //if(playerCamHeadParent) playerCam.transform.SetParent(playerCamHeadParent);
         playerCam.transform.SetParent(transform);
         Vector3 startPos = playerCam.transform.localPosition;
-        startPos.x = 0f;
-        startPos.z = 0f;
+        startPos.x = 0.0f;
         startPos.y = standCamY;
+        startPos.z = playerCam.transform.localPosition.z;
         playerCam.transform.localPosition = startPos;
         playerCam.transform.localRotation = Quaternion.identity;
 
@@ -147,6 +151,7 @@ public class MouseLook : CharacterComponentBase
 
         // Smooth camera vertical offset for crouch
         float targetY = isCrouching ? crouchCamY : standCamY;
+        if (!enableCrouchCamAdjust) targetY = standCamY;
         Vector3 camLocal = playerCam.transform.localPosition;
         camLocal.y = Mathf.Lerp(camLocal.y, targetY, camCrouchSmooth * Time.deltaTime);
         playerCam.transform.localPosition = camLocal;

@@ -90,6 +90,10 @@ public class CharacterMovement : CharacterComponentBase
     [Tooltip("Movement speed multiplier while crouched.")]
     [SerializeField] private float crouchSpeedMultiplier = 0.6f;
 
+    [Space(5.0f)]
+
+    [SerializeField] private KeyCode crouchKey = KeyCode.C;
+
     private bool isCrouching = false;
     private float originalHeight;
     private Vector3 originalCenter;
@@ -162,21 +166,30 @@ public class CharacterMovement : CharacterComponentBase
         // -------- SPEED --------
         float targetSpeed = walkSpeed;
 
-        if(Mathf.Approximately(input.x, 0.0f) && Mathf.Approximately(input.y, 0.0f))
+        if (isSwimming)
         {
-            if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("Walking", false);
+            if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("Swimming", true);
         }
         else
         {
-            if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("Walking", true);
+            if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("Swimming", false);
 
-            if (inWater)
+            if (Mathf.Approximately(input.x, 0.0f) && Mathf.Approximately(input.y, 0.0f))
             {
-                if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("SlowWalk", true);
+                if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("Walking", false);
             }
             else
             {
-                if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("SlowWalk", false);
+                if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("Walking", true);
+
+                if (inWater)
+                {
+                    if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("SlowWalk", true);
+                }
+                else
+                {
+                    if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("SlowWalk", false);
+                }
             }
         }
 
@@ -394,16 +407,22 @@ public class CharacterMovement : CharacterComponentBase
     // CROUCH LOGIC
     private void HandleCrouchInput()
     {
-        bool crouchHeld = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        bool crouchHeld = Input.GetKey(crouchKey);
 
         if (crouchHeld && isGrounded)
         {
             isCrouching = true;
+
+            if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("Crouch", true);
         }
         else if (!crouchHeld)
         {
             if (CanStandUp())
+            {
                 isCrouching = false;
+
+                if (characterUsingComponent) characterUsingComponent.SetAnimatorBool("Crouch", false);
+            }
         }
 
         if (mouseLook != null)

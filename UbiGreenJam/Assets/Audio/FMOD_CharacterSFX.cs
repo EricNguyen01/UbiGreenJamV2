@@ -57,12 +57,12 @@ public class FMOD_CharacterSFX : MonoBehaviour
     */
 
 
-    void PlayWalkEvent()
+    public void PlayWalkEvent()
     {
         // Start with material check then instantiate sound
         MaterialCheck();
         EventInstance Walk = RuntimeManager.CreateInstance(FootstepsSFX);
-        RuntimeManager.AttachInstanceToGameObject(Walk, transform.gameObject, GetComponent<Rigidbody>());
+        RuntimeManager.AttachInstanceToGameObject(Walk, transform.gameObject, true);
 
         // Sets the Terrain parameter
         Walk.setParameterByName("Ground-Water", MaterialValue);
@@ -74,10 +74,10 @@ public class FMOD_CharacterSFX : MonoBehaviour
         Walk.release();
     }
 
-    void PlayLandedEvent() 
+    public void PlayLandedEvent() 
     {
         EventInstance Landed = RuntimeManager.CreateInstance(LandedSFX);
-        RuntimeManager.AttachInstanceToGameObject(Landed, transform.gameObject, GetComponent<Rigidbody>());
+        RuntimeManager.AttachInstanceToGameObject(Landed, transform.gameObject, true);
 
         // Sets the Terrain parameter
         Landed.setParameterByName("Ground-Water", MaterialValue);
@@ -89,13 +89,13 @@ public class FMOD_CharacterSFX : MonoBehaviour
 
     }
 
-    void PlayJumpEvent()
+    public void PlayJumpEvent()
     {
         /*Debug.Log("SFX Played"); */
 
 
         EventInstance Jump = RuntimeManager.CreateInstance(JumpSFX);
-        RuntimeManager.AttachInstanceToGameObject(Jump, transform.gameObject, GetComponent<Rigidbody>());
+        RuntimeManager.AttachInstanceToGameObject(Jump, transform.gameObject, true);
 
         // Sets the Terrain parameter
         Jump.setParameterByName("Ground-Water", MaterialValue);

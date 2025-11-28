@@ -336,7 +336,7 @@ namespace GameCore
             {
                 characterUsingComponent.SetAnimatorBool("Holding", true);
 
-                characterUsingComponent.SetAnimatorLayerWeight(1, 1.0f);
+                characterUsingComponent.SetAnimatorLayerWeight("UpperArms", 0.5f);
             }
         }
 
@@ -362,7 +362,7 @@ namespace GameCore
             {
                 characterUsingComponent.SetAnimatorBool("Holding", false);
 
-                characterUsingComponent.SetAnimatorLayerWeight(1, 0.0f);
+                characterUsingComponent.SetAnimatorLayerWeight("UpperArms", 0.0f);
             }
 
             heldRb.isKinematic = pickUpOriginalKinematicState;
