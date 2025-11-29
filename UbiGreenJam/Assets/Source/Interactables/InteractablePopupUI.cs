@@ -1,12 +1,13 @@
 ﻿using TMPro;
 using UnityEngine;
-using FMODUnity;
+using UnityEngine.UI;
 
 public class InteractablePopupUI : MonoBehaviour
 {
 
     [Header("UI Refs")]
     public Canvas interactWorldUICanvas;
+    public Image interactIndicatorIconImage;
     public TextMeshProUGUI promptText;
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI costText;   // <- add this text in your prefab

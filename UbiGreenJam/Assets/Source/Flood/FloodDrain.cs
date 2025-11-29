@@ -330,9 +330,18 @@ public class FloodDrain : InteractableBase
     {
         promptVisible = true;
 
-        string unclogStr = $"{unclogKey} - Unclog";
+        string unclogStr = "Unclog";
 
-        if (clogLevel <= 0.0f) unclogStr = "No Clog";
+        if (clogLevel <= 0.0f)
+        {
+            unclogStr = "No Clog";
+
+            if(popupUI && popupUI.interactIndicatorIconImage) popupUI.interactIndicatorIconImage.enabled = false;
+        }
+        else
+        {
+            if (popupUI && popupUI.interactIndicatorIconImage) popupUI.interactIndicatorIconImage.enabled = true;
+        }
 
         if(currentDrainPopupTextUpdateTime > 0.0f && currentDrainPopupTextUpdateTime <= updateDrainPopupTextTime)
         {
