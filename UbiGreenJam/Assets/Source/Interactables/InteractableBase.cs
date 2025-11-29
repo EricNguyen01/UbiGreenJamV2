@@ -199,6 +199,8 @@ public class InteractableBase : MonoBehaviour
 
         if (!itemData.isDamageable || !damageable) return;
 
+        if (isPendingDestroy || itemCurrentHealth <= 0.0f) return;
+
         if(healthToDeduct < 0.0f) healthToDeduct = 0.0f;
 
         itemCurrentHealth -= healthToDeduct * (itemData ? itemData.floodDamageMitigation : 1.0f);
@@ -210,12 +212,14 @@ public class InteractableBase : MonoBehaviour
             furnitureColliderRigidbodyData.SetHealthOverlayShaderValue(inversedNormalizedCurrentHP);
         }
 
-        /*
+        
         if(itemCurrentHealth <= 0.0f)
         {
-            if(!isPendingDestroy) DestroyInteractable();
+            //if(!isPendingDestroy) DestroyInteractable();
+
+            isPendingDestroy = true;
         }
-        */
+        
     }
     
     //Disable Destroying interactables for now, let's see which option we prefer more
