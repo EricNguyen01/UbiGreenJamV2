@@ -210,12 +210,16 @@ public class InteractableBase : MonoBehaviour
             furnitureColliderRigidbodyData.SetHealthOverlayShaderValue(inversedNormalizedCurrentHP);
         }
 
+        /*
         if(itemCurrentHealth <= 0.0f)
         {
             if(!isPendingDestroy) DestroyInteractable();
         }
+        */
     }
-
+    
+    //Disable Destroying interactables for now, let's see which option we prefer more
+    /*
     private void DestroyInteractable()
     {
         StopAllCoroutines();
@@ -268,6 +272,7 @@ public class InteractableBase : MonoBehaviour
             Destroy(gameObject, delay);
         }
     }
+    */
 
     public void EnableInteractableOutline(bool enabled)
     {
