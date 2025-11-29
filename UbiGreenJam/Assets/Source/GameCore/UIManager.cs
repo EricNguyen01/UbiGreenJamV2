@@ -59,22 +59,18 @@ public class UIManager : MonoBehaviour
     public GameObject loadingPopup;
     public TextMeshProUGUI loadingText;
     public bool isLoading = false;
+    [Header("Pre-storm indicator")]
+    public GameObject preStormGO;
+    public Image preStormImage;
+    public Sprite[] preStormSprites;  
+    [Header("Info Screen")]
+    public GameObject infoScreen;
+    public CanvasGroup m_InfoScreen;
+    public TextMeshProUGUI infoText;  
 
     public void Start()
     {
-        m_MainMenu.alpha = 1;
-        MainMenu.gameObject.SetActive(true);
-
-        m_Tutorial.alpha = 0;
-        Tutorial.gameObject.SetActive(false);
-
-        m_credits.alpha = 0;
-        Credits.gameObject.SetActive(false);
-
-        m_Lobby.alpha = 0;
-        Lobby.gameObject.SetActive(false);
-
-        PauseMenu.gameObject.SetActive(false);
+        StartCoroutine(ShowInfoScreen(5f));
     }
     public void SetGameplayMode(bool active)
     {
@@ -91,6 +87,46 @@ public class UIManager : MonoBehaviour
             UpdateHouseValueHUD();
         }
     }
+    public IEnumerator ShowInfoScreen(float duration)
+    {
+        if (infoScreen == null || m_InfoScreen == null) yield break;
+
+        infoScreen.SetActive(true);
+        m_InfoScreen.alpha = 1;
+        m_InfoScreen.interactable = true;
+        m_InfoScreen.blocksRaycasts = true;
+
+        float elapsed = 0f;
+        int dotCount = 0;
+        while (elapsed < duration)
+        {
+            dotCount = (dotCount + 1) % 4;
+            string dots = new string('.', dotCount);
+            if (infoText != null) infoText.text = $"Loading{dots}";
+
+            yield return new WaitForSeconds(0.5f);
+            elapsed += 0.5f;
+        }
+
+        float t = 0;
+        while (t < fadeDuration)
+        {
+            t += Time.deltaTime;
+            m_InfoScreen.alpha = Mathf.Lerp(1, 0, t / fadeDuration);
+            yield return null;
+        }
+        m_InfoScreen.alpha = 0;
+        infoScreen.SetActive(false);
+
+        if (MainMenu != null)
+        {
+            MainMenu.SetActive(true);
+            m_MainMenu.alpha = 1;
+            m_MainMenu.interactable = true;
+            m_MainMenu.blocksRaycasts = true;
+        }
+    }
+
     void TogglePauseMenu()
     {
         if (PauseMenu.activeSelf)
@@ -101,6 +137,26 @@ public class UIManager : MonoBehaviour
         {
             ShowPauseMenu();
         }
+    }
+    public void ShowPreStormIndicator(bool show)
+    {
+        if (!preStormGO || !preStormImage) return;
+        preStormGO.SetActive(show);
+    }
+    public IEnumerator PlayPreStormSequence(float durationSeconds)
+    {
+        if (!preStormGO || !preStormImage || preStormSprites == null || preStormSprites.Length < 3)
+            yield break;
+
+        preStormGO.SetActive(true);
+        float perSprite = durationSeconds / 3f;
+        for (int i = 0; i < 3; i++)
+        {
+            preStormImage.sprite = preStormSprites[i];
+            yield return new WaitForSeconds(perSprite);
+        }
+
+        preStormGO.SetActive(false);
     }
     public IEnumerator ShowLoadingPopup(float duration)
     {

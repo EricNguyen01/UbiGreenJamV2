@@ -141,11 +141,12 @@ namespace GameCore
                 .completed += (op) =>
                 {
                     _uiManager?.ShowUI(false);
-
+                    _uiManager.endGamePopup.SetActive(false);
+                    _uiManager.stormPhaseText.text = "";
                     currentHeldItem = null;
                     interactablesInSceneRuntime.Clear();
                     StartPreparePhase();
-
+                    HouseValueSyncManager.Instance.RestartGame();
                     Debug.Log("Game restarted");
                 };
         }
