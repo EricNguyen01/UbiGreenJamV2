@@ -218,8 +218,20 @@ public class InteractableBase : MonoBehaviour
             //if(!isPendingDestroy) DestroyInteractable();
 
             isPendingDestroy = true;
+            if (GameManager.Instance)
+                GameManager.Instance.DeRegisterInteractableRuntime(this);
         }
         
+    }
+    public void ResetInteractable()
+    {
+        itemCurrentHealth = itemMaxHealth;
+        isPendingDestroy = false;
+        if (furnitureColliderRigidbodyData)
+        {
+            furnitureColliderRigidbodyData.SetHealthOverlayShaderValue(0f);
+            furnitureColliderRigidbodyData.DisableFurnitureColliders(false);
+        }
     }
     
     //Disable Destroying interactables for now, let's see which option we prefer more

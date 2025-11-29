@@ -114,7 +114,7 @@ private IEnumerator RecalculateHouseValueNextFrame()
         int total = 0;
         foreach (var item in GameManager.Instance.interactablesInSceneRuntime)
         {
-            if (item != null && item.itemData != null)
+            if (item != null && item.itemData != null && !item.isPendingDestroy)
             {
                 total += item.itemData.cost;
             }
@@ -277,6 +277,7 @@ private IEnumerator RecalculateHouseValueNextFrame()
         if (flood == null) return;
 
         flood.StartFlood();
+        if (startHouseValue == 0) 
         startHouseValue = syncedHouseValue;
         endPopupShown = false;
 

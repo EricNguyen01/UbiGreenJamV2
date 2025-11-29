@@ -146,6 +146,11 @@ namespace GameCore
                     currentHeldItem = null;
                     interactablesInSceneRuntime.Clear();
                     StartPreparePhase();
+                    foreach (var interactable in FindObjectsOfType<InteractableBase>())
+                    {
+                        interactable.ResetInteractable();
+                        RegisterInteractableRuntime(interactable);
+                    }
                     HouseValueSyncManager.Instance.RestartGame();
                     Debug.Log("Game restarted");
                 };
