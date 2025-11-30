@@ -13,7 +13,7 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
     public int syncedMaxHouseValue { get; private set; } = 0;
 
     [Header("Flood HUD Settings")]
-    private float prepareDuration = 3.5f;          
+    private float prepareDuration = 60f;          
     private double floodStartTimePhoton = 0.0; 
     private bool floodActive = false;            
     public float stormDuration = 120f;
@@ -68,15 +68,6 @@ private IEnumerator RecalculateHouseValueNextFrame()
         {
             flood.StopFlood();
             flood.StartLowering();
-        }
-        if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
-        {
-            photonView.RPC(nameof(RPC_PlayPreStormSequence), RpcTarget.AllBuffered, prepareDuration);
-        }
-        else
-        {
-            GameManager.Instance.GetUIManager()?.StartCoroutine(
-                GameManager.Instance.GetUIManager().PlayPreStormSequence(prepareDuration));
         }
     }
 
@@ -158,6 +149,13 @@ private IEnumerator RecalculateHouseValueNextFrame()
         {
             double remaining = floodStartTimePhoton - now;
             if (remaining < 0) remaining = 0;
+            ui.stormPhaseText.text = "Prepare Time";
+            ui.timerText.text = GameManager.FormatTime((float)remaining);
+            if (remaining <= 3.0 && !ui.preStormGO.activeSelf)
+            {
+                ui.StartCoroutine(ui.PlayPreStormSequence(3f));
+            }
+            ui.timerText.color = remaining <= 30 ? Color.red : Color.white;
         }
         else
         {
@@ -165,7 +163,9 @@ private IEnumerator RecalculateHouseValueNextFrame()
             double remaining = stormDuration - elapsed;
             if (remaining < 0) remaining = 0;
             ui.stormPhaseText.text =
-                $"Survive the storm: <color=#EE6148>{GameManager.FormatTime((float)remaining)}</color>";
+                $"Survive the storm";
+            ui.timerText.text = GameManager.FormatTime((float)remaining);
+            ui.timerText.color = remaining <= 30 ? Color.red : Color.white;
             if (floodActive && (remaining <= 0 || flood.GetNormalizedFloodLevel() >= 1f))
             {
                 floodActive = false;
@@ -208,9 +208,6 @@ private IEnumerator RecalculateHouseValueNextFrame()
         double now = PhotonNetwork.InRoom ? PhotonNetwork.Time : Time.time;
         if (!floodActive && now >= floodStartTimePhoton)
         {
-            //FMOD EVENT CUE
-            if (AudioManager.Instance) AudioManager.Instance.PlayOneShot(FMODEvents.Instance.StormStart, transform.position);
-
             floodActive = true;
 
             if (PhotonNetwork.InRoom)
@@ -222,6 +219,7 @@ private IEnumerator RecalculateHouseValueNextFrame()
             {
                 RPC_StartFloodSync();
             }
+            GameManager.Instance.GetUIManager()?.preStormGO.SetActive(false);
         }
 
         if (floodActive && flood.GetNormalizedFloodLevel() >= 1f)
@@ -283,7 +281,6 @@ private IEnumerator RecalculateHouseValueNextFrame()
         if (startHouseValue == 0) 
         startHouseValue = syncedHouseValue;
         endPopupShown = false;
-
         Debug.Log($"[Flood] StartFloodSync: startHouseValue={startHouseValue}");
     }
 }

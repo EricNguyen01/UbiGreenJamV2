@@ -35,6 +35,7 @@ public class UIManager : MonoBehaviour
     public Image houseValueBar;
     public GameObject houseValueHUD;
     public TextMeshProUGUI stormPhaseText;
+    public TextMeshProUGUI timerText;
     private float maxHouseValue = 0f;
     private float currentHouseValue = 0f;
 
@@ -66,7 +67,7 @@ public class UIManager : MonoBehaviour
     [Header("Info Screen")]
     public GameObject infoScreen;
     public CanvasGroup m_InfoScreen;
-    public TextMeshProUGUI infoText;  
+    public TextMeshProUGUI infoText; 
 
     public void Start()
     {
@@ -157,6 +158,10 @@ public class UIManager : MonoBehaviour
         }
 
         preStormGO.SetActive(false);
+        if (AudioManager.Instance)
+        {
+            AudioManager.Instance.PlayOneShot(FMODEvents.Instance.StormStart, transform.position);
+        }
     }
     public IEnumerator ShowLoadingPopup(float duration)
     {
@@ -222,7 +227,7 @@ public class UIManager : MonoBehaviour
         if (max <= 0) max = current;
 
         if (houseValueText != null)
-            houseValueText.text = $"₫ {HelperFunction.FormatCostWithDots(Mathf.RoundToInt(current).ToString())}";
+            houseValueText.text = $"{HelperFunction.FormatCostWithDots(Mathf.RoundToInt(current).ToString())}";
 
         if (houseValueBar != null)
             houseValueBar.fillAmount = Mathf.Clamp01((float)current / max);
