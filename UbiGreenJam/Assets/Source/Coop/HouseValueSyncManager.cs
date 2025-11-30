@@ -149,7 +149,7 @@ private IEnumerator RecalculateHouseValueNextFrame()
         {
             double remaining = floodStartTimePhoton - now;
             if (remaining < 0) remaining = 0;
-            ui.stormPhaseText.text = "Prepare Time";
+            ui.stormPhaseText.text = "Preparation Time";
             ui.timerText.text = GameManager.FormatTime((float)remaining);
             if (remaining <= 3.0 && !ui.preStormGO.activeSelf)
             {
