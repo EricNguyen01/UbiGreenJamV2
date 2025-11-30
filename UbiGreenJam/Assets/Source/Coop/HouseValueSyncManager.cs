@@ -208,6 +208,9 @@ private IEnumerator RecalculateHouseValueNextFrame()
         double now = PhotonNetwork.InRoom ? PhotonNetwork.Time : Time.time;
         if (!floodActive && now >= floodStartTimePhoton)
         {
+            //FMOD EVENT CUE
+            if (AudioManager.Instance) AudioManager.Instance.PlayOneShot(FMODEvents.Instance.StormStart, transform.position);
+
             floodActive = true;
 
             if (PhotonNetwork.InRoom)
