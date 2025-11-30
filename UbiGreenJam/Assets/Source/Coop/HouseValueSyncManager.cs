@@ -149,13 +149,13 @@ private IEnumerator RecalculateHouseValueNextFrame()
         {
             double remaining = floodStartTimePhoton - now;
             if (remaining < 0) remaining = 0;
-            ui.stormPhaseText.text = "Preparation Time";
+            ui.stormPhaseText.text = "PREPARATION TIME!";
             ui.timerText.text = GameManager.FormatTime((float)remaining);
             if (remaining <= 3.0 && !ui.preStormGO.activeSelf)
             {
                 ui.StartCoroutine(ui.PlayPreStormSequence(3f));
             }
-            ui.timerText.color = remaining <= 30 ? Color.red : Color.white;
+            ui.timerText.color = remaining <= 30 ? (ColorUtility.TryParseHtmlString("#FF8282", out var c) ? c : Color.red) : Color.white;
         }
         else
         {
@@ -163,9 +163,9 @@ private IEnumerator RecalculateHouseValueNextFrame()
             double remaining = stormDuration - elapsed;
             if (remaining < 0) remaining = 0;
             ui.stormPhaseText.text =
-                $"Survive the storm";
+                $"SURVIVE THE STORM!";
             ui.timerText.text = GameManager.FormatTime((float)remaining);
-            ui.timerText.color = remaining <= 30 ? Color.red : Color.white;
+            ui.timerText.color = remaining <= 30 ? (ColorUtility.TryParseHtmlString("#FF8282", out var c) ? c : Color.red) : Color.white;
             if (floodActive && (remaining <= 0 || flood.GetNormalizedFloodLevel() >= 1f))
             {
                 floodActive = false;

@@ -295,7 +295,7 @@ public class UIManager : MonoBehaviour
 
             pauseButtonTexts[0].text = "Resume";
             pauseButtonTexts[1].text = "Restart";
-            pauseButtonTexts[2].text = "Back To Main Menu";
+            pauseButtonTexts[2].text = "Main Menu";
 
             pauseButtons[0].onClick.RemoveAllListeners();
             pauseButtons[0].onClick.AddListener(ResumeGame);
@@ -312,7 +312,7 @@ public class UIManager : MonoBehaviour
             isPaused = false;
 
             pauseButtonTexts[0].text = "Resume";
-            pauseButtonTexts[1].text = "Back To Main Menu";
+            pauseButtonTexts[1].text = "Main Menu";
 
             pauseButtons[0].onClick.RemoveAllListeners();
             pauseButtons[0].onClick.AddListener(HidePauseMenu);
