@@ -193,10 +193,13 @@ public class FloodController : MonoBehaviour
             if(lastFloodHeight < 2.0f && currentHeight >= 2.0f && currentHeight < 5.0f)
             {
                 if (AudioManager.Instance) AudioManager.Instance.SetMusicParameter("StormPhases", 1);
+                if (AudioManager.Instance) AudioManager.Instance.SetAmbienceParameter("StormPhases", 1);
             }
             else if(lastFloodHeight < 5.0f && currentHeight >= 5.0f)
             {
                 if (AudioManager.Instance) AudioManager.Instance.SetMusicParameter("StormPhases", 2);
+                if (AudioManager.Instance) AudioManager.Instance.SetAmbienceParameter("StormPhases", 2);
+
             }
 
             lastFloodHeight = currentHeight;
