@@ -143,7 +143,7 @@ public class FloodDrain : InteractableBase
             UpdateVisuals(activeDraining: false);
         }
 
-        if (Input.GetKeyDown(unclogKey))
+        if (Input.GetKeyDown(unclogKey) || Input.GetKey(unclogKey))
         {
             if (!requirePlayerInTrigger || playerInside)
             if (PhotonNetwork.InRoom)

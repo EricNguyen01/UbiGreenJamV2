@@ -81,6 +81,10 @@ public class CharacterMovement : CharacterComponentBase
 
     private bool isSwimming = false;
     private float waterSurfaceY = float.NegativeInfinity;
+
+    private float playSwimmingSoundTime = 2.5f;
+
+    private float currentSwimmingTime = 0.0f;
     // ------------------------------------------
 
     // -------- CROUCH VALUES --------
@@ -130,17 +134,27 @@ public class CharacterMovement : CharacterComponentBase
             if (isSwimming)
             {
                 if (submergedAmount < swimExitSubmerge)
+                {
+                    currentSwimmingTime = 0f;
+
                     isSwimming = false;
+                }
             }
             else
             {
-                if (submergedAmount > swimEnterSubmerge)
+                if (!isSwimming && submergedAmount > swimEnterSubmerge)
+                {
+                    if (AudioManager.Instance) AudioManager.Instance.PlayOneShot(FMODEvents.Instance.SwimmingSFX, transform.position);
+
                     isSwimming = true;
+                }
             }
         }
         else
         {
             isSwimming = false;
+
+            currentSwimmingTime = 0f;
         }
 
         // When we newly enter swimming (belly+ water), calm vertical velocity
@@ -148,6 +162,21 @@ public class CharacterMovement : CharacterComponentBase
         {
             velocity.y = 0f;
             underwaterJumpTimer = 0f;
+        }
+
+        if (isSwimming)
+        {
+            if(currentSwimmingTime < playSwimmingSoundTime)
+            {
+                currentSwimmingTime += Time.deltaTime;
+
+                if(currentSwimmingTime >= playSwimmingSoundTime)
+                {
+                    currentSwimmingTime = 0f;
+
+                    if (AudioManager.Instance) AudioManager.Instance.PlayOneShot(FMODEvents.Instance.SwimmingSFX, transform.position);
+                }
+            }
         }
 
         // Timers
