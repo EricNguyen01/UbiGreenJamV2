@@ -15,6 +15,9 @@ public class FMODEvents : MonoBehaviour
     [field: Header("Ambience Sound")]
     [field: SerializeField] public EventReference AmbienceSound { get; private set; }
 
+    [field: Header("Background Music")]
+    [field: SerializeField] public EventReference MusicEvent { get; private set; }
+
     [field: Header("Drain Interaction Sound")]
     [field: SerializeField] public EventReference DrainInteraction { get; private set; }
 

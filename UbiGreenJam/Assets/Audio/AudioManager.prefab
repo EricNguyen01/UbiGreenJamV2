@@ -72,6 +72,13 @@ MonoBehaviour:
       Data3: 1168072864
       Data4: 748351180
     Path: event:/Ambience
+  <MusicEvent>k__BackingField:
+    Guid:
+      Data1: 863866751
+      Data2: 1221290612
+      Data3: -328376664
+      Data4: 2143006808
+    Path: event:/BGM
   <DrainInteraction>k__BackingField:
     Guid:
       Data1: -828039491
@@ -86,34 +93,6 @@ MonoBehaviour:
       Data3: 799300282
       Data4: -2132690724
     Path: event:/DrainUnclogging
-  <GroundLand>k__BackingField:
-    Guid:
-      Data1: 90243198
-      Data2: 1120166188
-      Data3: -1864573770
-      Data4: -1214807204
-    Path: event:/LandGround
-  <WaterLand>k__BackingField:
-    Guid:
-      Data1: -1322506124
-      Data2: 1164813356
-      Data3: -260776057
-      Data4: 490167576
-    Path: event:/LandWater
-  <WaterJump>k__BackingField:
-    Guid:
-      Data1: -1250076640
-      Data2: 1172388116
-      Data3: -881683316
-      Data4: 141433853
-    Path: event:/JumpWater
-  <FootstepsSFX>k__BackingField:
-    Guid:
-      Data1: 1102909112
-      Data2: 1086715792
-      Data3: -1509129025
-      Data4: 53475227
-    Path: event:/Footsteps
   <SwimmingSFX>k__BackingField:
     Guid:
       Data1: 1054199791
@@ -131,6 +110,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5429251286880253792}
   - component: {fileID: 7416575091199535624}
+  - component: {fileID: 3681250845544752098}
   m_Layer: 0
   m_Name: AudioManager
   m_TagString: Untagged
@@ -164,5 +144,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9721a239ba69ad143b3c7a27a1b665f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3681250845544752098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5992828145248307444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3583bcc366d11194dbe501da831bc9a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
