@@ -68,7 +68,7 @@ public class UIManager : MonoBehaviour
     public GameObject infoScreen;
     public CanvasGroup m_InfoScreen;
     public TextMeshProUGUI infoText; 
-
+    private bool isGameEnded = false;
     public void Start()
     {
         StartCoroutine(ShowInfoScreen(5f));
@@ -87,6 +87,10 @@ public class UIManager : MonoBehaviour
         {
             UpdateHouseValueHUD();
         }
+    }
+    public void SetGameEnded(bool ended)
+    {
+        isGameEnded = ended;
     }
     public IEnumerator ShowInfoScreen(float duration)
     {
@@ -158,7 +162,7 @@ public class UIManager : MonoBehaviour
         }
 
         preStormGO.SetActive(false);
-        if (AudioManager.Instance)
+        if (!isGameEnded && AudioManager.Instance)
         {
             AudioManager.Instance.PlayOneShot(FMODEvents.Instance.StormStart, transform.position);
         }
@@ -188,6 +192,7 @@ public class UIManager : MonoBehaviour
     }
     public void ShowEndReport(int lossVND)
     {
+        SetGameEnded(true);
         if (!endGamePopup || !endReportText) return;
 
         string formattedLoss = HelperFunction.FormatCostWithDots(lossVND.ToString());
@@ -341,6 +346,7 @@ public class UIManager : MonoBehaviour
     {
         HidePauseMenu();
         Time.timeScale = 1f;
+        SetGameEnded(false);
         GameManager.Instance.RestartGame(); 
     }
 
@@ -348,6 +354,7 @@ public class UIManager : MonoBehaviour
     {
         HidePauseMenu();
         Time.timeScale = 1f;
+        SetGameEnded(false);
         GameManager.Instance.ReturnToMainMenu(); 
     }
 
@@ -357,11 +364,13 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
         if (PhotonNetwork.InRoom)
         {
+            SetGameEnded(false);
             StartCoroutine(WaitForLeftRoomThenReturnToMainMenu());
             PhotonNetwork.LeaveRoom();
         }
         else
         {
+            SetGameEnded(false);
             GameManager.Instance.ReturnToMainMenu();
         }
     }
