@@ -78,6 +78,8 @@ public class FloodController : MonoBehaviour
     public RainLevel[] rainForecast = new RainLevel[5];
     private float rainUpdateTimer = 0f;
     private float rainUpdateInterval = 5f;
+
+    private float lastFloodHeight = 0.0f;
     // --------------------------------------------------------
 
     private void Awake()
@@ -159,6 +161,8 @@ public class FloodController : MonoBehaviour
 
         isRising = false;
 
+        if (AudioManager.Instance) AudioManager.Instance.SetMusicParameter("StormPhases", 0);
+
         UpdateScaleAndPosition();
         UpdateVisualWater();
     }
@@ -185,6 +189,17 @@ public class FloodController : MonoBehaviour
         if (isRising)
         {
             currentHeight += currentRiseSpeed * dt;
+
+            if(lastFloodHeight < 2.0f && currentHeight >= 2.0f && currentHeight < 5.0f)
+            {
+                if (AudioManager.Instance) AudioManager.Instance.SetMusicParameter("StormPhases", 1);
+            }
+            else if(lastFloodHeight < 5.0f && currentHeight >= 5.0f)
+            {
+                if (AudioManager.Instance) AudioManager.Instance.SetMusicParameter("StormPhases", 2);
+            }
+
+            lastFloodHeight = currentHeight;
 
             if (currentHeight >= maxHeight)
             {
