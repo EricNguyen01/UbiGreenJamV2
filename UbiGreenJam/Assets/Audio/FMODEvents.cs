@@ -27,6 +27,10 @@ public class FMODEvents : MonoBehaviour
     [field: Header("Swimming SFX")]
     [field: SerializeField] public EventReference SwimmingSFX { get; private set; }
 
+    [field: Header("Storm Start SFX")]
+    [field: SerializeField] public EventReference StormStart { get; private set; }
+
+
 
 
     public static FMODEvents Instance { get; private set; }
