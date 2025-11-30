@@ -46,7 +46,7 @@ public class InteractableItemData : ScriptableObject
     [Header("Flood Damage Mitigation")]
 
     [HelpBox("0.0f = full mitigation, take no damage from flood | 1.0f = no mitigation, take full flood damage.")]
-    [Range(0.0f, 1.0f)]
+    [Range(0.0f, 2.0f)]
     public float floodDamageMitigation = 1.0f;
 
 }
