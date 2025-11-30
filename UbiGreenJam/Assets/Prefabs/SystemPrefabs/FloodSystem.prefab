@@ -199,8 +199,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   floodTriggerCollider: {fileID: 7138043155550617585}
-  maxHeight: 8
-  baseRiseSpeed: 0.3
+  maxHeight: 6
+  baseRiseSpeed: 0.1
   lowerSpeed: 0.5
   playerFlood: {fileID: 0}
   intensityMultipliers:
@@ -208,13 +208,14 @@ MonoBehaviour:
   - 1
   - 1.8
   currentIntensity: 0
-  intensityLerpSpeed: 2
+  intensityLerpSpeed: 1
   waterVisual: {fileID: 5671607651723754223}
   visualOffset: 0.1
-  startRisingOnPlay: 1
+  startRisingOnPlay: 0
   onFloodMaxed:
     m_PersistentCalls:
       m_Calls: []
+  rainForecast: 0000000000000000000000000000000000000000
 --- !u!114 &7758649501069379374
 MonoBehaviour:
   m_ObjectHideFlags: 0
