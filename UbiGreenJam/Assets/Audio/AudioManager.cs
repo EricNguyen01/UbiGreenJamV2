@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using FMODUnity;
 using FMOD.Studio;
-using UnityEditor.SearchService;
 
 // Explicitly qualify EventReference to resolve CS0433 ambiguity
 public class AudioManager : MonoBehaviour
@@ -41,6 +40,8 @@ public class AudioManager : MonoBehaviour
     {
         ambienceEventInstances = CreateEventInstance(ambienceEventReference);
         ambienceEventInstances.start();
+        ambienceEventInstances.set3DAttributes(RuntimeUtils.To3DAttributes(Vector3.zero));
+
     }
 
     public void SetMusicParameter(string parameterName, float parameterValue)
