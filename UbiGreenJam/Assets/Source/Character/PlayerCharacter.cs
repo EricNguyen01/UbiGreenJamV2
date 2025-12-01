@@ -107,13 +107,13 @@ public class PlayerCharacter : CharacterBase
                 return;
 
             HelperFunction.SetLayerDeep(gameObject, LayerMask.NameToLayer("LocalPlayerCull"));
+
+            AssignCharaSkinMat();
         }
         else
         {
             HelperFunction.SetLayerDeep(gameObject, LayerMask.NameToLayer("LocalPlayerCull"));
         }
-
-        AssignCharaSkinMat();
     }
 
     private void AssignCharaSkinMat()
