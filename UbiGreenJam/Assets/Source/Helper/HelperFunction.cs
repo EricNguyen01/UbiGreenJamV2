@@ -41,4 +41,19 @@ public static class HelperFunction
 
         renderer.materials = mats;
     }
+
+    public static void SetLayerDeep(GameObject root, int newLayer)
+    {
+        Stack<Transform> stack = new Stack<Transform>();
+        stack.Push(root.transform);
+
+        while (stack.Count > 0)
+        {
+            Transform current = stack.Pop();
+            current.gameObject.layer = newLayer;
+
+            foreach (Transform child in current)
+                stack.Push(child);
+        }
+    }
 }

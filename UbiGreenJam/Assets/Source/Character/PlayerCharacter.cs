@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using GameCore;
+using ExitGames.Client.Photon;
 
 [RequireComponent(typeof(CharacterMovement), typeof(MouseLook))]
 public class PlayerCharacter : CharacterBase
@@ -96,6 +97,26 @@ public class PlayerCharacter : CharacterBase
 
             characterMovement.enabled = true;
             characterMouseLook.enabled = true;
+        }
+
+        if (Photon.Pun.PhotonNetwork.InRoom)
+        {
+            if (!TryGetComponent<Photon.Pun.PhotonView>(out var pv) || !pv.IsMine)
+                return;
+
+            foreach (var observedComp in pv.ObservedComponents)
+            {
+                if (observedComp && observedComp == this)
+                {
+                    HelperFunction.SetLayerDeep(observedComp.gameObject, LayerMask.NameToLayer("LocalPlayerCull"));
+
+                    break;
+                }
+            }
+        }
+        else
+        {
+            HelperFunction.SetLayerDeep(gameObject, LayerMask.NameToLayer("LocalPlayerCull"));
         }
     }
 }

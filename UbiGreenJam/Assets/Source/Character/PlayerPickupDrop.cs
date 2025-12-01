@@ -36,7 +36,7 @@ namespace GameCore
 
         private Vector3 smoothVel;
 
-        void Start()
+        protected override void Start()
         {
             if (holdPoint == null)
             {
