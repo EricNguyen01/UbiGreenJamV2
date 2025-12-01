@@ -2,6 +2,8 @@ using UnityEngine;
 using Photon.Pun;
 using GameCore;
 using ExitGames.Client.Photon;
+using NUnit.Framework;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(CharacterMovement), typeof(MouseLook))]
 public class PlayerCharacter : CharacterBase
@@ -109,6 +111,54 @@ public class PlayerCharacter : CharacterBase
         else
         {
             HelperFunction.SetLayerDeep(gameObject, LayerMask.NameToLayer("LocalPlayerCull"));
+        }
+
+        AssignCharaSkinMat();
+    }
+
+    private void AssignCharaSkinMat()
+    {
+        if (!GameManager.Instance) return;
+
+        int randMatIndex = 0;
+
+        Material headMat = null;
+
+        Material bodyMat = null;
+
+        if(GameManager.Instance.characterHeadSkinMats != null && GameManager.Instance.characterHeadSkinMats.Count > 0)
+        {
+            randMatIndex = Random.Range(0, GameManager.Instance.characterHeadSkinMats.Count);
+
+            headMat = GameManager.Instance.characterHeadSkinMats[randMatIndex];
+
+            GameManager.Instance.characterHeadSkinMats.RemoveAt(randMatIndex);
+        }
+
+        if (GameManager.Instance.characterBodySkinMats != null && GameManager.Instance.characterBodySkinMats.Count > 0)
+        {
+            randMatIndex = Random.Range(0, GameManager.Instance.characterBodySkinMats.Count);
+
+            bodyMat = GameManager.Instance.characterBodySkinMats[randMatIndex];
+
+            GameManager.Instance.characterBodySkinMats.RemoveAt(randMatIndex);
+        }
+
+        if (!headMat && !bodyMat) return;
+
+        SkinnedMeshRenderer playerCharSkinMeshRend = GetComponentInChildren<SkinnedMeshRenderer>();
+
+        if (playerCharSkinMeshRend)
+        {
+            List<Material> charSkinMats = new List<Material>();
+
+            //assign skin mats exactly in the order below:
+            
+            charSkinMats.Add(bodyMat);// body mat needs to be the first mat assigned
+
+            charSkinMats.Add(headMat);// head mat has to be the 2nd mat 
+
+            playerCharSkinMeshRend.SetMaterials(charSkinMats);
         }
     }
 }
