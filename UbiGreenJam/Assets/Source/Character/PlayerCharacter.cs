@@ -107,13 +107,13 @@ public class PlayerCharacter : CharacterBase
                 return;
 
             HelperFunction.SetLayerDeep(gameObject, LayerMask.NameToLayer("LocalPlayerCull"));
-
-            AssignCharaSkinMat();
         }
         else
         {
             HelperFunction.SetLayerDeep(gameObject, LayerMask.NameToLayer("LocalPlayerCull"));
         }
+
+        AssignCharaSkinMat();
     }
 
     private void AssignCharaSkinMat()
@@ -126,22 +126,24 @@ public class PlayerCharacter : CharacterBase
 
         Material bodyMat = null;
 
-        if(GameManager.Instance.characterHeadSkinMats != null && GameManager.Instance.characterHeadSkinMats.Count > 0)
+        if(GameSceneManager.GameSceneManagerInstance.characterHeadSkinMats != null && GameSceneManager.GameSceneManagerInstance.characterHeadSkinMats.Count > 0)
         {
-            randMatIndex = Random.Range(0, GameManager.Instance.characterHeadSkinMats.Count);
+            if (GameSceneManager.GameSceneManagerInstance.characterHeadSkinMats.Count == 1) randMatIndex = 0;
+            else randMatIndex = Random.Range(0, GameSceneManager.GameSceneManagerInstance.characterHeadSkinMats.Count);
 
-            headMat = GameManager.Instance.characterHeadSkinMats[randMatIndex];
+            headMat = GameSceneManager.GameSceneManagerInstance.characterHeadSkinMats[randMatIndex];
 
-            GameManager.Instance.characterHeadSkinMats.RemoveAt(randMatIndex);
+            GameSceneManager.GameSceneManagerInstance.characterHeadSkinMats.RemoveAt(randMatIndex);
         }
 
-        if (GameManager.Instance.characterBodySkinMats != null && GameManager.Instance.characterBodySkinMats.Count > 0)
+        if (GameSceneManager.GameSceneManagerInstance.characterBodySkinMats != null && GameSceneManager.GameSceneManagerInstance.characterBodySkinMats.Count > 0)
         {
-            randMatIndex = Random.Range(0, GameManager.Instance.characterBodySkinMats.Count);
+            if (GameSceneManager.GameSceneManagerInstance.characterBodySkinMats.Count == 1) randMatIndex = 0;
+            else randMatIndex = Random.Range(0, GameSceneManager.GameSceneManagerInstance.characterBodySkinMats.Count);
 
-            bodyMat = GameManager.Instance.characterBodySkinMats[randMatIndex];
+            bodyMat = GameSceneManager.GameSceneManagerInstance.characterBodySkinMats[randMatIndex];
 
-            GameManager.Instance.characterBodySkinMats.RemoveAt(randMatIndex);
+            GameSceneManager.GameSceneManagerInstance.characterBodySkinMats.RemoveAt(randMatIndex);
         }
 
         if (!headMat && !bodyMat) return;

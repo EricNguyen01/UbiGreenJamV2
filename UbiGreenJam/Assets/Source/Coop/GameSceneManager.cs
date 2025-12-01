@@ -1,12 +1,21 @@
-using UnityEngine;
-using Photon.Pun;
 using GameCore;
+using Photon.Pun;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class GameSceneManager : MonoBehaviour
 {
+    [Header("Player Spawn Points")]
+
     public Transform[] spawnPoints;
 
-    public PlayerCharacter characterPrefabToSpawnLocal;
+    [Header("Character Skins")]
+
+    public List<Material> characterHeadSkinMats = new List<Material>();
+
+    public List<Material> characterBodySkinMats = new List<Material>();
+
+    [Header("Player Prefab Path")]
 
     public string playerPrefabResourcePath = "Player";
 

@@ -29,12 +29,6 @@ namespace GameCore
 
         public List<InteractableBase> interactablesInSceneRuntime = new List<InteractableBase>();
 
-        [Header("Character Skins")]
-
-        public List<Material> characterHeadSkinMats = new List<Material>();
-
-        public List<Material> characterBodySkinMats = new List<Material>();
-
         [field: Space(15.0f)]
 
         #region Events
