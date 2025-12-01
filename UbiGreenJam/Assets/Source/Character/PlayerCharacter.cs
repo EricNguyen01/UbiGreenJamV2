@@ -104,15 +104,7 @@ public class PlayerCharacter : CharacterBase
             if (!TryGetComponent<Photon.Pun.PhotonView>(out var pv) || !pv.IsMine)
                 return;
 
-            foreach (var observedComp in pv.ObservedComponents)
-            {
-                if (observedComp && observedComp == this)
-                {
-                    HelperFunction.SetLayerDeep(observedComp.gameObject, LayerMask.NameToLayer("LocalPlayerCull"));
-
-                    break;
-                }
-            }
+            HelperFunction.SetLayerDeep(gameObject, LayerMask.NameToLayer("LocalPlayerCull"));
         }
         else
         {
