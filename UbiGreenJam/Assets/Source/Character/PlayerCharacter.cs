@@ -118,7 +118,7 @@ public class PlayerCharacter : CharacterBase
 
     private void AssignCharaSkinMat()
     {
-        if (!GameManager.Instance) return;
+        if (!GameSceneManager.GameSceneManagerInstance) return;
 
         int randMatIndex = 0;
 
@@ -145,8 +145,6 @@ public class PlayerCharacter : CharacterBase
 
             GameSceneManager.GameSceneManagerInstance.characterBodySkinMats.RemoveAt(randMatIndex);
         }
-
-        if (!headMat && !bodyMat) return;
 
         SkinnedMeshRenderer playerCharSkinMeshRend = GetComponentInChildren<SkinnedMeshRenderer>();
 
