@@ -13,7 +13,7 @@ public class HouseValueSyncManager : MonoBehaviourPun, IPunObservable
     public int syncedMaxHouseValue { get; private set; } = 0;
 
     [Header("Flood HUD Settings")]
-    private float prepareDuration = 40f;          
+    private float prepareDuration = 30f;          
     private double floodStartTimePhoton = 0.0; 
     private bool floodActive = false;            
     private float stormDuration = 150f;
