@@ -197,7 +197,6 @@ private IEnumerator RecalculateHouseValueNextFrame()
         {
             GameManager.Instance.GetUIManager()?.ShowEndReport(loss);
         }
-        Time.timeScale = 0f;
         Debug.Log($"[Flood] Ended. start={startHouseValue}, end={endHouseValue}, loss={loss}");
     }
 
