@@ -74,6 +74,7 @@ private IEnumerator RecalculateHouseValueNextFrame()
     private void Update()
     {
         if (IsUILoading()) return;
+        if (endPopupShown) return;
         if (PhotonNetwork.IsMasterClient || !PhotonNetwork.InRoom)
         {
             CalculateAndSyncHouseValue();
